@@ -1,0 +1,28 @@
+h2 Recipes
+each item in data.recipes
+    h4
+        b
+            a(href= item.source_url)
+                = item.title
+    .indented
+        .row
+            .col-md-6
+                img(src=item.image_url, width=400)
+                br
+            .col-md-6
+                h5
+                    b
+                        = "Publisher: "
+                    a(href= item.publisher)
+                        = item.publisher
+                - var social_rank = item.social_rank;
+                - social_rank = +social_rank.toFixed(1);
+                h5
+                    b Social Rank: 
+                    = social_rank
+        br
+
+        //pre= JSON.stringify(item)
+
+h3 Raw data
+pre= JSON.stringify(data, null, ' ')

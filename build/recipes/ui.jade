@@ -1,0 +1,29 @@
+h5 Search All Recipes
+.row
+    .col-md-8
+        .form-group.form-group-default
+            label Ingredient(s)            
+            input#ingredient.form-control(type='text', required='')  
+.row    
+    .indentedui
+        .col-md-4                         
+            button.btn.btn-primary(onClick='recipes.searchByIngredient($("#ingredient").val())') Search
+br
+
+h5 View Trending Recipes
+.row
+    .indentedui
+        .col-md-4
+            button.btn.btn-primary(onClick='recipes.searchByIngredient("", "t")') View
+br
+
+h5 Favorites
+ul
+    li
+        a(href="#" onClick='recipes.searchByIngredient("chocolate, peanut butter")') Chocolate + Peanut Butter
+    li
+        a(href="#" onClick='recipes.searchByIngredient("farro")') Farro
+    li
+        a(href="#" onClick='recipes.searchByIngredient("pasta")') Pasta
+    li
+        a(href="#" onClick='recipes.searchByIngredient("chicken")') Chicken
