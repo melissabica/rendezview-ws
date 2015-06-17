@@ -1,3 +1,4 @@
 {
-    "baseUrl": "/sophy/"
+    "baseUrl": "/sophy/",
+    "port": 3000
 }
