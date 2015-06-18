@@ -56,9 +56,12 @@
 				scene = new THREE.Scene();
 
 				var geometry = new THREE.BoxGeometry( 100,100,100); 
-				var material =  new THREE.MeshLambertMaterial( { color:0xffffff, shading: THREE.FlatShading } );
-				var mesh = new THREE.Mesh( geometry, material );
-				scene.add( mesh );
+				var material =  new THREE.MeshLambertMaterial( { color: 'blue'} );
+				var cube = new THREE.Mesh( geometry, material );
+			      cube.overdraw = true;
+			      cube.rotation.x = Math.PI * 0.1;
+			      scene.add(cube);				
+				scene.add( cube );
 
 				// lights
 
@@ -66,12 +69,14 @@
 				light.position.set( 1, 1, 1 );
 				scene.add( light );
 
-				light = new THREE.DirectionalLight( 0x002288 );
+				light = new THREE.DirectionalLight( 0xffffff );
 				light.position.set( -1, -1, -1 );
 				scene.add( light );
 
 				light = new THREE.AmbientLight( 0x222222 );
 				scene.add( light );
+
+
 
 				// renderer
 
@@ -81,6 +86,8 @@
 				renderer.setSize( WIDTH, HEIGHT );
 
 				container.appendChild( renderer.domElement );
+
+				// stats
 
 				stats = new Stats();
 				stats.domElement.style.position = 'absolute';

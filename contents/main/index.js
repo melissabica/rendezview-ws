@@ -9,7 +9,7 @@ var main = {
         })
 
         //three.js visualization
-        $.get("/sophy/main/test2.html", function(html) {
+        $.get("/sophy/main/test3.html", function(html) {
             // console.log(html)
             $("#list").html(html)
         })
