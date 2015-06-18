@@ -5,7 +5,7 @@
 	// var HEADERHEIGHT = document.getElementById('header').offsetHeight
 	var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true) //includes margins
 	// console.log("header height ", HEADERHEIGHT2, HEADERHEIGHT1)
-	var HEIGHT = window.innerHeight - HEADERHEIGHT2 //fills whole screen height beneath header
+	var HEIGHT = window.innerHeight - HEADERHEIGHT //fills whole screen height beneath header
 	var scene = new THREE.Scene(); 
 	
 	var camera = new THREE.PerspectiveCamera( 75, WIDTH / HEIGHT, 0.1, 1000 ); 
@@ -18,11 +18,18 @@
 	renderer.setSize( WIDTH, HEIGHT ); 
 	container.appendChild( renderer.domElement );
 
-	var geometry = new THREE.BoxGeometry( 1, 1, 1 ); 
+	var geometry = new THREE.BoxGeometry( 3,3,3); 
 	var material = new THREE.MeshBasicMaterial( { color: 0x00ff00, wireframe:true } ); 
 	var cube = new THREE.Mesh( geometry, material ); 
 	scene.add( cube ); 
 
+
+	var ambientLight = new THREE.AmbientLight(0xbbbbbb);
+	scene.add(ambientLight);
+
+	var directionalLight = new THREE.DirectionalLight(0xffffff);
+	directionalLight.position.set(1,1,1).normalize();
+	scene.add(directionalLight);
 
 
 	camera.position.z = 5;

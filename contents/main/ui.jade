@@ -1,39 +1,12 @@
-.row
-    button.btn.btn-primary(onClick='recipes.searchByIngredient($("#ingredient").val())') Distribution
-.row
-    button.btn.btn-primary(onClick='recipes.searchByIngredient($("#ingredient").val())') Point Pattern
-.row
-    button.btn.btn-primary(onClick='recipes.searchByIngredient($("#ingredient").val())') Local Pattern
-.row
-    button.btn.btn-primary(onClick='recipes.searchByIngredient($("#ingredient").val())') Database Config
-
-//
-    h5 Search All Recipes
-    .row
-        .col-md-8
-            .form-group.form-group-default
-                label Ingredient(s)            
-                input#ingredient.form-control(type='text', required='')  
-    .row    
-        .indentedui
-            .col-md-4                         
-                button.btn.btn-primary(onClick='recipes.searchByIngredient($("#ingredient").val())') Search
-    br
-
-    h5 View Trending Recipes
-    .row
-        .indentedui
-            .col-md-4
-                button.btn.btn-primary(onClick='recipes.searchByIngredient("", "t")') View
-    br
-
-    h5 Favorites
-    ul
+#sidebar-wrapper
+    ul.sidebar-nav
+        li.sidebar-brand
+            a(href='#') Sophy         
         li
-            a(href="#" onClick='recipes.searchByIngredient("chocolate, peanut butter")') Chocolate + Peanut Butter
+          a(href='#') Distribution       
         li
-            a(href="#" onClick='recipes.searchByIngredient("farro")') Farro
+          a(href='#') Point Pattern
         li
-            a(href="#" onClick='recipes.searchByIngredient("pasta")') Pasta
+          a(href='#') Local Pattern
         li
-            a(href="#" onClick='recipes.searchByIngredient("chicken")') Chicken
+          a(href='#') Database Config
