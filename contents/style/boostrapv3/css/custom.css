@@ -19,3 +19,16 @@ h3{
 .content{
 	background-color: #000000;
 }
+
+#inset  {
+    width: 100px;
+    height: 100px;
+    background-color: #fff; /* or transparent; will show through only if renderer alpha: true */
+    border: 1px solid black; /* or none; */
+    margin: 20px;
+    padding: 0px;
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    z-index: 100;
+}
