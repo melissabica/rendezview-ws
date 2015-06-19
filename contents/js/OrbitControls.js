@@ -318,6 +318,8 @@ THREE.OrbitControls = function ( object, domElement ) {
 	function onMouseWheel( event ) {
 
 		if ( scope.enabled === false ) return;
+	    event.preventDefault();  //these 2 lines prevent browser
+	    event.stopPropagation(); //page from scrolling when zooming
 		if ( scope.userZoom === false ) return;
 
 		var delta = 0;

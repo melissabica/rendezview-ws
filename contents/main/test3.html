@@ -17,18 +17,17 @@
 			var container, stats;
 			var camera, controls, scene, renderer;
 			var cross;
+			
+			// set dimensions of area for visualization
+			var WIDTH = document.getElementById('list').offsetWidth
+			var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
+			// console.log("header height ", HEADERHEIGHT2, HEADERHEIGHT1)
+			var HEIGHT = window.innerHeight - HEADERHEIGHT //fills whole screen height beneath header	
 
 			init();
 			animate();
 
 			function init() {
-
-				// set dimensions of area for visualization
-
-				var WIDTH = document.getElementById('list').offsetWidth
-				var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+2 //includes margins
-				// console.log("header height ", HEADERHEIGHT2, HEADERHEIGHT1)
-				var HEIGHT = window.innerHeight - HEADERHEIGHT //fills whole screen height beneath header	
 
 				scene = new THREE.Scene();
 
@@ -124,9 +123,6 @@
 				addBox(100,200,100,200,200,'red');
 				addBox(100,200,100,-200,200,'green');
 
-
-				
-
 				window.addEventListener( 'resize', onWindowResize, false );
 
 				render();
@@ -179,13 +175,33 @@
 			}
 
 
-			function onWindowResize() {
+			// function onWindowResize() {
 
-				camera.aspect = WIDTH / HEIGHT;
-				camera.updateProjectionMatrix();
-				renderer.setSize( WIDTH, HEIGHT );
-				controls.handleResize();
-				render();
+			// 	// camera.aspect = WIDTH / HEIGHT;
+			// 	// camera.updateProjectionMatrix();
+			// 	// renderer.setSize( WIDTH, HEIGHT );
+			// 	// controls.handleResize(); //ERROR!!!///
+			// 	// render();
+
+			//     Width = container.clientWidth;
+			//     Height = container.clientHeight;
+			//     console.log(container,Width, Height)
+			//     renderer.setSize(Width, Height);
+			//     camera.aspect = Width / Height;
+			//     camera.updateProjectionMatrix();
+			//     controls.handleResize();				
+
+			// }
+			function onWindowResize(){
+
+				var resizeWidth = window.innerWidth;
+				var resizeHeight = window.innerHeight-HEADERHEIGHT;
+
+			    camera.aspect = resizeWidth / window.innerHeight;
+			    camera.updateProjectionMatrix();
+
+			    renderer.setSize( resizeWidth, resizeHeight);
+
 			}
 
 			function animate() {
