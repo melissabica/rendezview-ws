@@ -35,7 +35,8 @@
 			    renderer2,
 			    axes2,
 			    container2,
-			    timeLabel,
+			    xLabel,
+			    yLabel,
 			    CANVAS_WIDTH = 100,
 			    CANVAS_HEIGHT = 100,
 			    CAM_DISTANCE = 300;
@@ -145,7 +146,7 @@
 				scene2.add( axes2 );
 
 				// LABELS
-				var shape = new THREE.TextGeometry("Time", 
+				var shape = new THREE.TextGeometry("X", 
 					{size: 20,
 				     height: 0,
 				     curveSegments: 3,
@@ -153,17 +154,21 @@
 				     weight: 'normal'
 				    });
 				var wrapper = new THREE.MeshBasicMaterial({color: 0x000000});
-				timeLabel = new THREE.Mesh(shape, wrapper);
-				timeLabel.position.set(0,100,0);	
-				scene2.add(timeLabel);
+				xLabel = new THREE.Mesh(shape, wrapper);
+				xLabel.position.set(100,0,0);	
+				scene2.add(xLabel);
 
+				var shape2 = new THREE.TextGeometry("Y", 
+					{size: 20,
+				     height: 0,
+				     curveSegments: 3,
+				     font: 'helvetiker',
+				     weight: 'normal'
+				    });
+				yLabel = new THREE.Mesh(shape2, wrapper);
+				yLabel.position.set(0,0,100);	
+				scene2.add(yLabel);
 
-				// var timeLabel = document.createElement( 'div' );
-				// timeLabel.className = 'number';
-				// timeLabel.textContent = "THREE.JS";
-				// object = new THREE.CSS3DObject( timeLabel );
-
-				// scene2.add(object);
 
 				//ADD BOXES
 
@@ -266,21 +271,25 @@
 
 			    camera2.lookAt( scene2.position );
 
-				render();		
+				render();
 			}
 
 			function render() {
 
 				renderer.render( scene, camera );
 				renderer2.render( scene2, camera2 );
-				if ( timeLabel ) //billboarding: always have label face camera
-					timeLabel.lookAt( camera.position );
+				// if ( timeLabel ) //billboarding: always have label face camera
+					// timeLabel.lookAt( camera.position );
+				xLabel.quaternion.copy( camera.quaternion );
+				yLabel.quaternion.copy( camera.quaternion );
 				stats.update();
 			}
 
 
 
 		</script>
+
+		<h5 id="time-label">Time</h5>
 
 	</body>
 </html>
