@@ -9,10 +9,17 @@ var main = {
         })
 
         //three.js visualization
-        $.get("/sophy/main/test3.html", function(html) {
+        $.get("/sophy/main/visualization.html", function(html) {
             // console.log(html)
-            $("#list").html(html)
+            $("#visualization").html(html)
         })
+
+        // //three.js visualization
+        // $.get("/sophy/main/visualization.jade", function(template) {
+        //     var html = jade.render(template)
+        //     $("#list").html(html)
+        // })
+
 
     }
 

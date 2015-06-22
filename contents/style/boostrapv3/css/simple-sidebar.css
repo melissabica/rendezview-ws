@@ -40,7 +40,7 @@
 #page-content-wrapper {
     width: 100%;
     position: absolute;
-    padding: 15px;
+    /*padding: 150px;*/
 }
 
 #wrapper.toggled #page-content-wrapper {
@@ -73,9 +73,7 @@
 .sidebar-nav li a:hover {
     text-decoration: none;
     color: #fff;
-    /*background: rgba(255,255,255,0.2); //original */ 
-    background: -moz-linear-gradient(right, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 90%); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(to right, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 90%); /* Standard syntax (must be last) */    
+    background: rgba(255,255,255,0.2);
 }
 
 .sidebar-nav li a:active,
@@ -116,7 +114,8 @@
     }
 
     #page-content-wrapper {
-        padding: 20px;
+        /*padding: 20px;*/
+        /*padding-left: 0px;*/
         position: relative;
     }
 

@@ -7,10 +7,13 @@
 	<body>
 		<!-- <div id="container"></div> -->
 
+		<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/CSS3DRenderer.js"></script>
+		<script src="fonts/helvetiker_regular.typeface.js"></script>
 		<script src="js/three.min.js"></script>
 		<script src="js/TrackballControls.js"></script>
 		<script src="js/OrbitControls.js"></script>
 		<script src="js/stats.min.js"></script>
+
 
 		<script>
 
@@ -20,15 +23,19 @@
 			var cross;
 			
 			// set dimensions of area for visualization
-			var WIDTH = document.getElementById('list').offsetWidth
-			var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
-			// console.log("header height ", HEADERHEIGHT2, HEADERHEIGHT1)
-			var HEIGHT = window.innerHeight - HEADERHEIGHT //fills whole screen height beneath header	
+			var WIDTH = document.getElementById('visualization').offsetWidth
+			// console.log('page-content-wrapper width is',WIDTH)
+			// console.log('window width ', window.innerWidth)
+			// var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
+			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 //fills whole screen height beneath header
+			var HEIGHT = window.innerHeight - HEADERHEIGHT
 
 			var camera2,
 			    scene2,
 			    renderer2,
 			    axes2,
+			    container2,
+			    timeLabel,
 			    CANVAS_WIDTH = 100,
 			    CANVAS_HEIGHT = 100,
 			    CAM_DISTANCE = 300;
@@ -54,7 +61,7 @@
 
 				renderer = new THREE.WebGLRenderer( { antialias: false } );
 				renderer.setSize(WIDTH, HEIGHT);
-				container = document.getElementById( 'list' );
+				container = document.getElementById( 'visualization' );
 				container.appendChild( renderer.domElement );
 
 
@@ -65,10 +72,10 @@
 				controls.userPanSpeed = 10
 
 				// Add axes
-				// axes = buildAxes( 1000 );
-				// scene.add( axes );
-				axes = new THREE.AxisHelper( 1000 );
+				axes = buildAxes( 1000 );
 				scene.add( axes );
+				// axes = new THREE.AxisHelper( 1000 );
+				// scene.add( axes );
 
 
 				// STATS
@@ -101,6 +108,7 @@
 				// FLOOR
 				var floorTexture = new THREE.ImageUtils.loadTexture( 'images/map-mirror.png' );
 				floorTexture.wrapS = floorTexture.wrapT = THREE.ClampToEdgeWrapping; 
+				floorTexture.minFilter = THREE.NearestFilter;
 				var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
 				var floorGeometry = new THREE.PlaneBufferGeometry(2000, 1237, 10, 10);
 				var floor = new THREE.Mesh(floorGeometry, floorMaterial);
@@ -121,8 +129,8 @@
 				container2 = document.getElementById('inset');
 
 				// RENDERER
-				renderer2 = new THREE.WebGLRenderer();
-				renderer2.setClearColor( 0xf0f0f0, 1 );
+				renderer2 = new THREE.WebGLRenderer({ alpha: true });
+				// renderer2.setClearColor( 0xf0f0fs0, 1 );
 				renderer2.setSize( CANVAS_WIDTH, CANVAS_HEIGHT );
 				container2.appendChild( renderer2.domElement );
 
@@ -136,6 +144,26 @@
 				axes2 = new THREE.AxisHelper( 100 );
 				scene2.add( axes2 );
 
+				// LABELS
+				var shape = new THREE.TextGeometry("Time", 
+					{size: 20,
+				     height: 0,
+				     curveSegments: 3,
+				     font: 'helvetiker',
+				     weight: 'normal'
+				    });
+				var wrapper = new THREE.MeshBasicMaterial({color: 0x000000});
+				timeLabel = new THREE.Mesh(shape, wrapper);
+				timeLabel.position.set(0,100,0);	
+				scene2.add(timeLabel);
+
+
+				// var timeLabel = document.createElement( 'div' );
+				// timeLabel.className = 'number';
+				// timeLabel.textContent = "THREE.JS";
+				// object = new THREE.CSS3DObject( timeLabel );
+
+				// scene2.add(object);
 
 				//ADD BOXES
 
@@ -163,12 +191,12 @@
 				var axes = new THREE.Object3D();
 
 				//vector()
-				axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000, false ) ); // +X west
-				axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( -length, 0, 0 ), 0xFF0000, true) ); // -X east
-				axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00, false ) ); // +Y up
-				axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, -length, 0 ), 0x00FF00, true ) ); // -Y down
-				axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, length ), 0x0000FF, false ) ); // +Z north
-				axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, -length ), 0x0000FF, true ) ); // -Z south
+				axes.add( buildAxis( new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000, false ) ); // +X west
+				// axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( -length, 0, 0 ), 0xFF0000, true) ); // -X east
+				axes.add( buildAxis( new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00, false ) ); // +Y up
+				// axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, -length, 0 ), 0x00FF00, true ) ); // -Y down
+				axes.add( buildAxis( new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( 0, 0, length ), 0x0000FF, false ) ); // +Z north
+				// axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, -length ), 0x0000FF, true ) ); // -Z south
 
 				return axes;
 
@@ -213,13 +241,15 @@
 			// }
 			function onWindowResize(){
 
-				var resizeWidth = document.getElementById('list').offsetWidth;
+				var resizeWidth = document.getElementById('visualization').offsetWidth;
 				var resizeHeight = window.innerHeight-HEADERHEIGHT;
 
 			    camera.aspect = resizeWidth / window.innerHeight;
 			    camera.updateProjectionMatrix();
 
 			    renderer.setSize( resizeWidth, resizeHeight);
+
+			    //https://github.com/mrdoob/three.js/issues/69
 
 			}
 
@@ -243,6 +273,8 @@
 
 				renderer.render( scene, camera );
 				renderer2.render( scene2, camera2 );
+				if ( timeLabel ) //billboarding: always have label face camera
+					timeLabel.lookAt( camera.position );
 				stats.update();
 			}
 
