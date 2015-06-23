@@ -7,12 +7,12 @@
 	<body>
 		<!-- <div id="container"></div> -->
 
-		<script src="https://dl.dropboxusercontent.com/u/3587259/Code/Threejs/CSS3DRenderer.js"></script>
 		<script src="fonts/helvetiker_regular.typeface.js"></script>
 		<script src="js/three.min.js"></script>
 		<script src="js/TrackballControls.js"></script>
 		<script src="js/OrbitControls.js"></script>
 		<script src="js/stats.min.js"></script>
+		<script src="js/Detector.js"></script>		
 
 
 		<script>
@@ -23,12 +23,14 @@
 			var cross;
 			
 			// set dimensions of area for visualization
-			var WIDTH = document.getElementById('visualization').offsetWidth
-			// console.log('page-content-wrapper width is',WIDTH)
+			var WIDTH = document.getElementById('lower').offsetWidth
+			console.log('WIDTH',WIDTH)
 			// console.log('window width ', window.innerWidth)
 			// var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
-			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 //fills whole screen height beneath header
+			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 + 30 //fills whole screen height beneath header
 			var HEIGHT = window.innerHeight - HEADERHEIGHT
+
+			console.log(WIDTH, HEIGHT)
 
 			var camera2,
 			    scene2,
@@ -37,12 +39,12 @@
 			    container2,
 			    xLabel,
 			    yLabel,
+			    time,
 			    CANVAS_WIDTH = 100,
 			    CANVAS_HEIGHT = 100,
 			    CAM_DISTANCE = 300;
 
 			init();
-			animate();
 
 			function init() {
 
@@ -59,8 +61,11 @@
 
 
 				// RENDERER
-
-				renderer = new THREE.WebGLRenderer( { antialias: false } );
+				if ( Detector.webgl )
+					renderer = new THREE.WebGLRenderer( {antialias:true} );
+				else
+					renderer = new THREE.CanvasRenderer(); 
+				// renderer = new THREE.WebGLRenderer( { antialias: false } );
 				renderer.setSize(WIDTH, HEIGHT);
 				container = document.getElementById( 'visualization' );
 				container.appendChild( renderer.domElement );
@@ -129,6 +134,14 @@
 				// CONTAINER
 				container2 = document.getElementById('inset');
 
+				// // STATIC TIME AXIS LABEL
+				// var timeLabel = document.createElement("h5");
+				// timeLabel.setAttribute("id", "time-label");
+				// var node = document.createTextNode("TIME");
+				// timeLabel.appendChild(node);
+				// var element = document.getElementById("inset");
+				// element.appendChild(timeLabel);
+
 				// RENDERER
 				renderer2 = new THREE.WebGLRenderer({ alpha: true });
 				// renderer2.setClearColor( 0xf0f0fs0, 1 );
@@ -145,7 +158,7 @@
 				axes2 = new THREE.AxisHelper( 100 );
 				scene2.add( axes2 );
 
-				// LABELS
+				// XY LABELS
 				var shape = new THREE.TextGeometry("X", 
 					{size: 20,
 				     height: 0,
@@ -161,13 +174,26 @@
 				var shape2 = new THREE.TextGeometry("Y", 
 					{size: 20,
 				     height: 0,
-				     curveSegments: 3,
+				     curveSegments: 10,
 				     font: 'helvetiker',
 				     weight: 'normal'
 				    });
 				yLabel = new THREE.Mesh(shape2, wrapper);
 				yLabel.position.set(0,0,100);	
 				scene2.add(yLabel);
+
+				var shape3 = new THREE.TextGeometry("TIME", 
+					{size: 20,
+				     height: 0,
+				     curveSegments: 3,
+				     font: 'helvetiker',
+				     weight: 'normal'
+				    });
+				time = new THREE.Mesh(shape3, wrapper);
+				time.position.set(-25,100,0);	
+				scene2.add(time);
+
+
 
 
 				//ADD BOXES
@@ -178,7 +204,8 @@
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
-				render();
+				animate();
+
 			}
 
 			function addBox(width, height, depth, xpos, ypos, color){
@@ -187,9 +214,10 @@
 
 				var geometry = new THREE.BoxGeometry( width,height,depth); 
 				var material =  new THREE.MeshLambertMaterial( { color: color} );
-				var cube1 = new THREE.Mesh( geometry, material );
-				cube1.position.set(xpos,tpos,ypos);	
-				scene.add( cube1 );
+				var cube = new THREE.Mesh( geometry, material );
+				cube.position.set(xpos,tpos,ypos);	
+				cube.addEventListener( 'click', function(){cubeScale()} , false );
+				scene.add( cube );
 			}
 
 			function buildAxes( length ) {
@@ -282,14 +310,19 @@
 					// timeLabel.lookAt( camera.position );
 				xLabel.quaternion.copy( camera.quaternion );
 				yLabel.quaternion.copy( camera.quaternion );
+				time.quaternion.copy( camera.quaternion );
 				stats.update();
 			}
 
+			function clicked(){
+				// alert("hi");
+				this.center.add( distance );
+			}
 
 
 		</script>
 
-		<h5 id="time-label">Time</h5>
+		<!-- <button onclick="clicked()" type="button" class="btn btn-success btn-lg"><span class="glyphicon glyphicon-edit"></span> Bootstrap Button</button> -->
 
 	</body>
 </html>
