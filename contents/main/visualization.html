@@ -24,11 +24,11 @@
 			
 			// set dimensions of area for visualization
 			var WIDTH = document.getElementById('lower').offsetWidth
-			console.log('WIDTH',WIDTH)
+			// console.log('WIDTH',WIDTH)
 			// var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
 			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 + 40 //fills whole screen height beneath header
 			var HEIGHT = window.innerHeight - HEADERHEIGHT
-			console.log(WIDTH, HEIGHT)
+			// console.log(WIDTH, HEIGHT)
 
 			var camera2,
 			    scene2,
@@ -229,10 +229,14 @@
 				//Toggle tag cloud
 				document.getElementById("tag-cloud-button").onclick = function() { 
 					var e = document.getElementById("tag-cloud");
-					if(e.style.display == 'block')
+					if(e.style.display == 'block'){
 						e.style.display = 'none';
-					else
+						tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");
+					}
+					else{
 						e.style.display = 'block';
+						tagCloudButton.setAttribute("class", "btn btn-primary btn-sm active");
+					}
 				}; 
 
 
