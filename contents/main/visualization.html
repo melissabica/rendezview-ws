@@ -25,11 +25,9 @@
 			// set dimensions of area for visualization
 			var WIDTH = document.getElementById('lower').offsetWidth
 			console.log('WIDTH',WIDTH)
-			// console.log('window width ', window.innerWidth)
 			// var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
 			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 + 40 //fills whole screen height beneath header
 			var HEIGHT = window.innerHeight - HEADERHEIGHT
-
 			console.log(WIDTH, HEIGHT)
 
 			var camera2,
@@ -48,9 +46,6 @@
 
 			function init() {
 
-
-
-
 				scene = new THREE.Scene();
 
 
@@ -59,7 +54,7 @@
 				var VIEW_ANGLE = 45, ASPECT = WIDTH / HEIGHT, NEAR = 0.1, FAR = 20000;
 				camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 				scene.add(camera);
-				camera.position.set(0,700,1500);
+				camera.position.set(0,1500,1500);
 				camera.lookAt(scene.position);	
 
 
@@ -137,13 +132,13 @@
 				// CONTAINER
 				container2 = document.getElementById('inset-axes');
 
-				// STATIC TIME AXIS LABEL
-				var timeLabel = document.createElement("h5");
-				timeLabel.setAttribute("id", "time-label");
-				var node = document.createTextNode("TIME");
-				timeLabel.appendChild(node);
-				var element = document.getElementById("inset-axes");
-				element.appendChild(timeLabel);
+				// // STATIC TIME AXIS LABEL
+				// var timeLabel = document.createElement("h5");
+				// timeLabel.setAttribute("id", "time-label");
+				// var node = document.createTextNode("TIME");
+				// timeLabel.appendChild(node);
+				// var element = document.getElementById("inset-axes");
+				// element.appendChild(timeLabel);
 
 				// RENDERER
 				renderer2 = new THREE.WebGLRenderer({ alpha: true });
@@ -171,7 +166,7 @@
 				    });
 				var wrapper = new THREE.MeshBasicMaterial({color: 0x000000});
 				xLabel = new THREE.Mesh(shape, wrapper);
-				xLabel.position.set(100,0,0);	
+				xLabel.position.set(100,0,0);
 				scene2.add(xLabel);
 
 				var shape2 = new THREE.TextGeometry("Y", 
@@ -196,11 +191,51 @@
 				time.position.set(-25,100,0);	
 				scene2.add(time);
 
+				//// RESET VIEW ////
+				var resetButton = document.createElement("a");
+				resetButton.setAttribute("href", "#");
+				resetButton.setAttribute("class", "btn btn-primary btn-sm");
+				resetButton.setAttribute("id", "reset-button");	
+				var resetSpan = document.createElement("span");
+				resetSpan.setAttribute("class","glyphicon glyphicon-refresh");
+				resetButton.appendChild(resetSpan);
+				var node = document.createTextNode(" Reset View");
+				resetButton.appendChild(node);
+				document.getElementById('visualization').appendChild(resetButton);
+				document.getElementById("reset-button").onclick = function() { 
+					console.log("reset camera view");
+					camera.position.set(0,1500,1500);
+					controls.center.set(0,0,0);
+					camera.lookAt(scene.position);
+					// http://stackoverflow.com/questions/16525043/reset-camera-using-orbitcontrols-js
+				}; 
+
+				//// TAG CLOUD ////
 				var tags = document.createElement("img");
 				tags.setAttribute("src", "images/tag-cloud.png");
 				tags.setAttribute("width", 300);
 				tags.setAttribute("id", "tag-cloud");
 				document.getElementById('visualization').appendChild(tags);
+
+				var tagCloudButton = document.createElement("a");
+				tagCloudButton.setAttribute("href", "#");
+				tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");
+				tagCloudButton.setAttribute("id", "tag-cloud-button");
+				tagCloudButton.style.right= resetButton.offsetWidth+"px";
+				var node = document.createTextNode(" Test Tag Cloud");
+				tagCloudButton.appendChild(node);
+				document.getElementById('visualization').appendChild(tagCloudButton);
+
+				//Toggle tag cloud
+				document.getElementById("tag-cloud-button").onclick = function() { 
+					var e = document.getElementById("tag-cloud");
+					if(e.style.display == 'block')
+						e.style.display = 'none';
+					else
+						e.style.display = 'block';
+				}; 
+
+
 
 				//// ADD BOXES ////
 
@@ -222,7 +257,7 @@
 				var material =  new THREE.MeshLambertMaterial( { color: color} );
 				var cube = new THREE.Mesh( geometry, material );
 				cube.position.set(xpos,tpos,ypos);	
-				cube.addEventListener( 'click', function(){cubeScale()} , false );
+				// cube.addEventListener( 'click', function(){cubeScale()} , false );
 				scene.add( cube );
 			}
 
@@ -261,23 +296,6 @@
 
 			}
 
-			// function onWindowResize() {
-
-			// 	// camera.aspect = WIDTH / HEIGHT;
-			// 	// camera.updateProjectionMatrix();
-			// 	// renderer.setSize( WIDTH, HEIGHT );
-			// 	// controls.handleResize(); //ERROR!!!///
-			// 	// render();
-
-			//     Width = container.clientWidth;
-			//     Height = container.clientHeight;
-			//     console.log(container,Width, Height)
-			//     renderer.setSize(Width, Height);
-			//     camera.aspect = Width / Height;
-			//     camera.updateProjectionMatrix();
-			//     controls.handleResize();				
-
-			// }
 			function onWindowResize(){
 
 				var resizeWidth = document.getElementById('visualization').offsetWidth;

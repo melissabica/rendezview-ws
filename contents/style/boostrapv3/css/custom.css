@@ -53,37 +53,25 @@ h3{
 /* Centering: http://stackoverflow.com/questions/1776915/how-to-center-absolute-element-in-div*/
 
 #tag-cloud  {
-    border: 1px solid black; /* or none; */
-    /*margin: 20px;*/
-    /*padding: 0px;*/
+    border: 1px solid black;
     position: absolute;
-    /*right: 0px;*/
-    /*top: 0px;*/
-    /*text-align:center;*/
-    /*z-index: 3;*/
-    /*left:0;*/
-    /*right:0;*/
-    /*margin-left:auto;*/
-    /*margin-right:auto;*/
     top:0;
     right:0;
-    z-index: 100;
+    display:none;
+    opacity:0.9;
 }
 
-#box-test  {
-    width: 500px;
-    height: 500px;
-    background-color: rgba(255,255,255, 0.9);    
-    border: 1px solid black; /* or none; */
-    /*margin: 20px;*/
-    /*padding: 0px;*/
-    position: relative;
-    /*right: 0px;*/
-    /*top: 0px;*/
-    /*text-align:center;*/
-    /*z-index: 1000;*/
+#tag-cloud-button  {
+    position: absolute;
+    bottom:5px;
 }
 
+
+#reset-button  {
+    position: absolute;
+    bottom:5px;
+    right:0;
+}
 
 
 /* Simple Sidebar */
