@@ -2,6 +2,10 @@
 <html lang="en">
 	<head>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+		  body {margin:1000;overflow:hidden;}
+		  /*canvas {display:block;}*/
+		</style> 		
 	</head>
 
 	<body>
@@ -13,6 +17,7 @@
 		<script src="js/OrbitControls.js"></script>
 		<script src="js/stats.min.js"></script>
 		<script src="js/Detector.js"></script>		
+		<script src="js/Projector.js"></script>
 
 
 		<script>
@@ -23,24 +28,31 @@
 			var cross;
 			
 			// set dimensions of area for visualization
-			var WIDTH = document.getElementById('lower').offsetWidth
-			// console.log('WIDTH',WIDTH)
+			var WIDTH = document.getElementById('lower').offsetWidth;
+			// var width2 = window.innerWidth - WIDTH - document.getElementById("lower").style.paddingLeft;
+			var width2 = window.innerWidth - WIDTH - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
 			// var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
-			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 + 40 //fills whole screen height beneath header
-			var HEIGHT = window.innerHeight - HEADERHEIGHT
+			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 + 40; //fills whole screen height beneath header
+			var HEIGHT = window.innerHeight - HEADERHEIGHT;
+			var height2 = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top'));
 			// console.log(WIDTH, HEIGHT)
+			console.log("width2: "+width2, " height2: "+height2);
+
 
 			var camera2,
-			    scene2,
-			    renderer2,
-			    axes2,
-			    container2,
-			    xLabel,
-			    yLabel,
-			    time,
-			    CANVAS_WIDTH = 100,
-			    CANVAS_HEIGHT = 100,
-			    CAM_DISTANCE = 300;
+				scene2,
+				renderer2,
+				axes2,
+				container2,
+				xLabel,
+				yLabel,
+				time,
+				CANVAS_WIDTH = 100,
+				CANVAS_HEIGHT = 100,
+				CAM_DISTANCE = 300;
+			var tagCloudButton;
+			var objects = [];            
+			var projector;
 
 			init();
 
@@ -159,11 +171,11 @@
 				// AXIS LABELS
 				var shape = new THREE.TextGeometry("X", 
 					{size: 20,
-				     height: 0,
-				     curveSegments: 3,
-				     font: 'helvetiker',
-				     weight: 'normal'
-				    });
+					 height: 0,
+					 curveSegments: 3,
+					 font: 'helvetiker',
+					 weight: 'normal'
+					});
 				var wrapper = new THREE.MeshBasicMaterial({color: 0x000000});
 				xLabel = new THREE.Mesh(shape, wrapper);
 				xLabel.position.set(100,0,0);
@@ -171,22 +183,22 @@
 
 				var shape2 = new THREE.TextGeometry("Y", 
 					{size: 20,
-				     height: 0,
-				     curveSegments: 10,
-				     font: 'helvetiker',
-				     weight: 'normal'
-				    });
+					 height: 0,
+					 curveSegments: 10,
+					 font: 'helvetiker',
+					 weight: 'normal'
+					});
 				yLabel = new THREE.Mesh(shape2, wrapper);
 				yLabel.position.set(0,0,100);	
 				scene2.add(yLabel);
 
 				var shape3 = new THREE.TextGeometry("TIME", 
 					{size: 20,
-				     height: 0,
-				     curveSegments: 3,
-				     font: 'helvetiker',
-				     weight: 'normal'
-				    });
+					 height: 0,
+					 curveSegments: 3,
+					 font: 'helvetiker',
+					 weight: 'normal'
+					});
 				time = new THREE.Mesh(shape3, wrapper);
 				time.position.set(-25,100,0);	
 				scene2.add(time);
@@ -217,7 +229,7 @@
 				tags.setAttribute("id", "tag-cloud");
 				document.getElementById('visualization').appendChild(tags);
 
-				var tagCloudButton = document.createElement("a");
+				tagCloudButton = document.createElement("a");
 				tagCloudButton.setAttribute("href", "#");
 				tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");
 				tagCloudButton.setAttribute("id", "tag-cloud-button");
@@ -225,20 +237,8 @@
 				var node = document.createTextNode(" Test Tag Cloud");
 				tagCloudButton.appendChild(node);
 				document.getElementById('visualization').appendChild(tagCloudButton);
-
 				//Toggle tag cloud
-				document.getElementById("tag-cloud-button").onclick = function() { 
-					var e = document.getElementById("tag-cloud");
-					if(e.style.display == 'block'){
-						e.style.display = 'none';
-						tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");
-					}
-					else{
-						e.style.display = 'block';
-						tagCloudButton.setAttribute("class", "btn btn-primary btn-sm active");
-					}
-				}; 
-
+				tagCloudButton.addEventListener("click", toggleTagCloud, false);
 
 
 				//// ADD BOXES ////
@@ -253,6 +253,56 @@
 
 			}
 
+			// Make objects clickable
+			var mouse = new THREE.Vector3(), INTERSECTED;
+			raycaster = new THREE.Raycaster();
+			container.addEventListener( 'click', onDocumentMouseMove, false );
+
+			function onDocumentMouseMove( event ) {
+				event.preventDefault();
+				// mouse.x = ( event.clientX / WIDTH ) * 2 - 1;
+				// mouse.y = -( event.clientY / HEIGHT ) * 2 + 1;
+
+				// console.log(event.clientX, event.clientY);
+				// console.log(width2, height2);
+				mouse.x = ( ( event.clientX - width2) / WIDTH ) * 2 - 1; 
+				mouse.y = - ( ( event.clientY - height2 ) / HEIGHT ) * 2 + 1;
+
+				mouse.z = 0.5;
+				// find intersections
+				raycaster.setFromCamera( mouse, camera );
+				var intersects = raycaster.intersectObjects( objects );
+				if( intersects.length > 0 ){// if an object was clicked
+					var intersect = intersects[ 0 ];
+					var newSelected = intersect.object;
+					console.log('you clicked on mesh '+ newSelected.name);
+					newSelected.material.color.setHex( Math.random() * 0xffffff );
+					toggleTagCloud();
+				}
+				else{
+					console.log('you clicked nothing');
+				}
+
+
+				// var mouse3D = new THREE.Vector3( ( event.clientX / WIDTH ) * 2 - 1,   //x
+				//                                 -( event.clientY / HEIGHT ) * 2 + 1,  //y
+				//                                 0.5 );                                            //z
+				// projector.unprojectVector( mouse3D, camera );  
+				// // vector.unproject(mouse3D,camera); 
+				// mouse3D.sub( camera.position );                
+				// mouse3D.normalize();
+				// var raycaster = new THREE.Raycaster( camera.position, mouse3D );
+				// var intersects = raycaster.intersectObjects( objects );
+				// // Change color if hit block
+				// if ( intersects.length > 0 ) {
+				// 	console.log(intersects[ 0 ].object.name);
+				//     intersects[ 0 ].object.material.color.setHex( Math.random() * 0xffffff );
+				// }
+				// render();
+
+			}
+
+
 			function addBox(width, height, depth, xpos, ypos, color){
 
 				var tpos = height/2
@@ -260,9 +310,19 @@
 				var geometry = new THREE.BoxGeometry( width,height,depth); 
 				var material =  new THREE.MeshLambertMaterial( { color: color} );
 				var cube = new THREE.Mesh( geometry, material );
-				cube.position.set(xpos,tpos,ypos);	
-				// cube.addEventListener( 'click', function(){cubeScale()} , false );
+				cube.position.set(xpos,tpos,ypos);
+				cube.name = color + ' box';
+
+				// var outlineMaterial1 = new THREE.MeshBasicMaterial( { color: 0xFFFF00, side: THREE.BackSide } );
+				// var outlineMesh1 = new THREE.Mesh( geometry, outlineMaterial1 );
+				// outlineMesh1.position.set(xpos,tpos,ypos);
+				// outlineMesh1.scale.multiplyScalar(1.05);
+				// scene.add( outlineMesh1 );				
+
 				scene.add( cube );
+				objects.push( cube );
+				console.log(cube.name)
+
 			}
 
 			function buildAxes( length ) {
@@ -300,24 +360,36 @@
 
 			}
 
+			function toggleTagCloud() { 
+				var e = document.getElementById("tag-cloud");
+				if(e.style.display == 'block'){
+					e.style.display = 'none';
+					tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");
+				}
+				else{
+					e.style.display = 'block';
+					document.getElementById("tag-cloud-button").className += " active";
+				}
+			}; 
+
 			function onWindowResize(){
 
 				var resizeWidth = document.getElementById('visualization').offsetWidth;
-				var resizeHeight = window.innerHeight-HEADERHEIGHT;
+				var resizeHeight = window.innerHeight - HEADERHEIGHT;
 
-			    camera.aspect = resizeWidth / window.innerHeight;
-			    camera.updateProjectionMatrix();
+				camera.aspect = resizeWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
 
-			    renderer.setSize( resizeWidth, resizeHeight);
+				renderer.setSize( resizeWidth, resizeHeight);
 
-			    //https://github.com/mrdoob/three.js/issues/69
+				//https://github.com/mrdoob/three.js/issues/69
 
 			}
 
 			function animate() {
 
-			    requestAnimationFrame( animate );
-			    controls.update();
+				requestAnimationFrame( animate );
+				controls.update();
 
 				camera2.position.copy( camera.position );
 				// camera2.position.sub( controls.target ); // added by @libe
@@ -325,7 +397,7 @@
 				camera2.position.sub( controls.center );
 				camera2.position.setLength( CAM_DISTANCE );
 
-			    camera2.lookAt( scene2.position );
+				camera2.lookAt( scene2.position );
 
 				render();
 			}
