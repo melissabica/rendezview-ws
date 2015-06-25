@@ -29,14 +29,14 @@
 			
 			// set dimensions of area for visualization
 			var WIDTH = document.getElementById('lower').offsetWidth;
-			// var width2 = window.innerWidth - WIDTH - document.getElementById("lower").style.paddingLeft;
-			var width2 = window.innerWidth - WIDTH - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
+			// var leftOffset = window.innerWidth - WIDTH - document.getElementById("lower").style.paddingLeft;
+			var leftOffset = window.innerWidth - WIDTH - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
 			// var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
 			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 + 40; //fills whole screen height beneath header
 			var HEIGHT = window.innerHeight - HEADERHEIGHT;
-			var height2 = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top'));
+			var topOffset = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top'));
 			// console.log(WIDTH, HEIGHT)
-			console.log("width2: "+width2, " height2: "+height2);
+			console.log("leftOffset: "+leftOffset, " topOffset: "+topOffset);
 
 
 			var camera2,
@@ -229,23 +229,23 @@
 				tags.setAttribute("id", "tag-cloud");
 				document.getElementById('visualization').appendChild(tags);
 
-				tagCloudButton = document.createElement("a");
-				tagCloudButton.setAttribute("href", "#");
-				tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");
-				tagCloudButton.setAttribute("id", "tag-cloud-button");
-				tagCloudButton.style.right= resetButton.offsetWidth+"px";
-				var node = document.createTextNode(" Test Tag Cloud");
-				tagCloudButton.appendChild(node);
-				document.getElementById('visualization').appendChild(tagCloudButton);
+				// tagCloudButton = document.createElement("a");
+				// tagCloudButton.setAttribute("href", "#");
+				// tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");
+				// tagCloudButton.setAttribute("id", "tag-cloud-button");
+				// tagCloudButton.style.right= resetButton.offsetWidth+"px";
+				// var node = document.createTextNode(" Test Tag Cloud");
+				// tagCloudButton.appendChild(node);
+				// document.getElementById('visualization').appendChild(tagCloudButton);
 				//Toggle tag cloud
-				tagCloudButton.addEventListener("click", toggleTagCloud, false);
+				// tagCloudButton.addEventListener("click", toggleTagCloud, false);
 
 
 				//// ADD BOXES ////
 
-				addBox(100,200,100,0,0,'blue');
-				addBox(100,100,100,200,200,'red');
-				addBox(100,50,100,-200,200,'green');
+				addBox(100,200,100,0,0,'#4B3BFF');
+				addBox(100,100,100,200,200,'#8175FF');
+				addBox(100,50,100,-200,200,'#B6B0FF');
 
 				window.addEventListener( 'resize', onWindowResize, false );
 
@@ -263,10 +263,8 @@
 				// mouse.x = ( event.clientX / WIDTH ) * 2 - 1;
 				// mouse.y = -( event.clientY / HEIGHT ) * 2 + 1;
 
-				// console.log(event.clientX, event.clientY);
-				// console.log(width2, height2);
-				mouse.x = ( ( event.clientX - width2) / WIDTH ) * 2 - 1; 
-				mouse.y = - ( ( event.clientY - height2 ) / HEIGHT ) * 2 + 1;
+				mouse.x = ( ( event.clientX - leftOffset) / WIDTH ) * 2 - 1; 
+				mouse.y = - ( ( event.clientY - topOffset ) / HEIGHT ) * 2 + 1;
 
 				mouse.z = 0.5;
 				// find intersections
@@ -275,9 +273,23 @@
 				if( intersects.length > 0 ){// if an object was clicked
 					var intersect = intersects[ 0 ];
 					var newSelected = intersect.object;
-					console.log('you clicked on mesh '+ newSelected.name);
-					newSelected.material.color.setHex( Math.random() * 0xffffff );
-					toggleTagCloud();
+					var color = newSelected.material.color.getHexString().toUpperCase();
+					var originalColor = newSelected.name;
+					var red = new THREE.Color( 0xFF0000 );
+
+					// change color of box
+					if(color != red.getHexString().toUpperCase()){
+						console.log("change from "+color+" to red "+ red.getHexString().toUpperCase());
+						newSelected.material.color.set( red );
+						toggleTagCloud(1);
+					}
+					else{
+						console.log("change from "+red.getHexString().toUpperCase()+" to original "+originalColor);
+						newSelected.material.color.set( originalColor );
+						toggleTagCloud(0);						
+					}
+					// newSelected.material.color.setHex( Math.random() * 0xffffff );
+
 				}
 				else{
 					console.log('you clicked nothing');
@@ -303,15 +315,15 @@
 			}
 
 
-			function addBox(width, height, depth, xpos, ypos, color){
+			function addBox( width, height, depth, xpos, ypos, color ){
 
-				var tpos = height/2
+				var tpos = height/2;
 
 				var geometry = new THREE.BoxGeometry( width,height,depth); 
 				var material =  new THREE.MeshLambertMaterial( { color: color} );
 				var cube = new THREE.Mesh( geometry, material );
 				cube.position.set(xpos,tpos,ypos);
-				cube.name = color + ' box';
+				cube.name = color;
 
 				// var outlineMaterial1 = new THREE.MeshBasicMaterial( { color: 0xFFFF00, side: THREE.BackSide } );
 				// var outlineMesh1 = new THREE.Mesh( geometry, outlineMaterial1 );
@@ -360,27 +372,44 @@
 
 			}
 
-			function toggleTagCloud() { 
+			function toggleTagCloud(onOff) { 
 				var e = document.getElementById("tag-cloud");
-				if(e.style.display == 'block'){
-					e.style.display = 'none';
-					tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");
+
+				if(onOff == 1){
+					e.style.display = 'block';
+					// document.getElementById("tag-cloud-button").className += " active";					
 				}
 				else{
-					e.style.display = 'block';
-					document.getElementById("tag-cloud-button").className += " active";
+					e.style.display = 'none';
+					// tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");					
 				}
+
+				// if(e.style.display == 'block'){
+				// 	e.style.display = 'none';
+				// 	tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");
+				// }
+				// else{
+				// 	e.style.display = 'block';
+				// 	document.getElementById("tag-cloud-button").className += " active";
+				// }
 			}; 
 
 			function onWindowResize(){
 
-				var resizeWidth = document.getElementById('visualization').offsetWidth;
-				var resizeHeight = window.innerHeight - HEADERHEIGHT;
+				// Recompute renderer dimensions
+				WIDTH = document.getElementById('visualization').offsetWidth;
+				HEIGHT = window.innerHeight - HEADERHEIGHT;
 
-				camera.aspect = resizeWidth / window.innerHeight;
+				// Recompute offsets of renderer for clicking objects
+				leftOffset = window.innerWidth - WIDTH - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
+				topOffset = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top'));
+				console.log("Resized: leftOffset: "+leftOffset, " topOffset: "+topOffset);
+
+				// Update camera and renderer
+				camera.aspect = WIDTH / window.innerHeight;
 				camera.updateProjectionMatrix();
 
-				renderer.setSize( resizeWidth, resizeHeight);
+				renderer.setSize( WIDTH, HEIGHT);
 
 				//https://github.com/mrdoob/three.js/issues/69
 
