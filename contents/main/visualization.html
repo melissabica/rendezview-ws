@@ -96,10 +96,10 @@
 
 				// STATS
 
-				stats = new Stats();
-				stats.domElement.style.position = 'absolute';
-				stats.domElement.style.bottom = '0px';
-				stats.domElement.style.zIndex = 100;
+				// stats = new Stats();
+				// stats.domElement.style.position = 'absolute';
+				// stats.domElement.style.bottom = '0px';
+				// stats.domElement.style.zIndex = 100;
 				// container.appendChild( stats.domElement );
 
 
@@ -271,6 +271,7 @@
 				raycaster.setFromCamera( mouse, camera );
 				var intersects = raycaster.intersectObjects( objects );
 				if( intersects.length > 0 ){// if an object was clicked
+
 					var intersect = intersects[ 0 ];
 					var newSelected = intersect.object;
 					var color = newSelected.material.color.getHexString().toUpperCase();
@@ -286,7 +287,8 @@
 					else{
 						console.log("change from "+red.getHexString().toUpperCase()+" to original "+originalColor);
 						newSelected.material.color.set( originalColor );
-						toggleTagCloud(0);						
+						if ( checkActiveBoxes() == false )
+							toggleTagCloud(0);
 					}
 					// newSelected.material.color.setHex( Math.random() * 0xffffff );
 
@@ -314,6 +316,28 @@
 
 			}
 
+			function checkActiveBoxes() {
+				var active;
+				var box;
+				var red = new THREE.Color( 0xFF0000 );
+				for (box in objects){
+					console.log("box color: "+objects[box].material.color.getHexString().toUpperCase());
+					var color = objects[box].material.color.getHexString().toUpperCase();
+					if (color == red.getHexString().toUpperCase()){
+						active = 1;
+						break;
+					}
+				}
+				if (active == 1){
+					// console.log("true");
+					return true;
+				}
+				else{
+					// console.log("false");
+					return false;
+				}
+
+			}
 
 			function addBox( width, height, depth, xpos, ypos, color ){
 
@@ -333,7 +357,7 @@
 
 				scene.add( cube );
 				objects.push( cube );
-				console.log(cube.name)
+				// console.log(cube.name)
 
 			}
 
@@ -401,9 +425,9 @@
 				HEIGHT = window.innerHeight - HEADERHEIGHT;
 
 				// Recompute offsets of renderer for clicking objects
-				leftOffset = window.innerWidth - WIDTH - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
-				topOffset = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top'));
-				console.log("Resized: leftOffset: "+leftOffset, " topOffset: "+topOffset);
+				// leftOffset = window.innerWidth - WIDTH - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
+				// topOffset = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top'));
+				// console.log("Resized: leftOffset: "+leftOffset, " topOffset: "+topOffset);
 
 				// Update camera and renderer
 				camera.aspect = WIDTH / window.innerHeight;
@@ -440,7 +464,7 @@
 				xLabel.quaternion.copy( camera.quaternion );
 				yLabel.quaternion.copy( camera.quaternion );
 				time.quaternion.copy( camera.quaternion );
-				stats.update();
+				// stats.update();
 			}
 
 		</script>
