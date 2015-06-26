@@ -5,7 +5,7 @@ New UI for Sophy framework
 
 	$ wintersmith preview
 
-The site can now be accessed at [http://localhost:8080/sophy](http://localhost:8080/sophy)
+The site can now be accessed at [http://localhost:3000/sophy](http://localhost:3000/sophy)
 
 # Deploy to gh-pages
 
