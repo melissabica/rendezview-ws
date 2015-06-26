@@ -17,7 +17,6 @@
 		<script src="js/OrbitControls.js"></script>
 		<script src="js/stats.min.js"></script>
 		<script src="js/Detector.js"></script>		
-		<script src="js/Projector.js"></script>
 
 
 		<script>
@@ -51,8 +50,11 @@
 				CANVAS_HEIGHT = 100,
 				CAM_DISTANCE = 300;
 			var tagCloudButton;
-			var objects = [];            
-			var projector;
+			var objects = [], // list of all boxes
+				selectedObjects = []; //list of active (red) boxes
+			var tags;
+			var mouse = new THREE.Vector3(), INTERSECTED;
+				raycaster = new THREE.Raycaster();
 
 			init();
 
@@ -128,7 +130,7 @@
 				var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
 				var floorGeometry = new THREE.PlaneBufferGeometry(2000, 1237, 10, 10);
 				var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-				floor.position.y = -0.5;
+				floor.position.y = -1; //originally -0.5
 				floor.rotation.x = Math.PI / 2;
 				scene.add(floor);
 
@@ -223,8 +225,8 @@
 				}; 
 
 				//// TAG CLOUD ////
-				var tags = document.createElement("img");
-				tags.setAttribute("src", "images/tag-cloud.png");
+				tags = document.createElement("img");
+				// tags.setAttribute("src", "images/index.jpg");
 				tags.setAttribute("width", 300);
 				tags.setAttribute("id", "tag-cloud");
 				document.getElementById('visualization').appendChild(tags);
@@ -243,21 +245,18 @@
 
 				//// ADD BOXES ////
 
-				addBox(100,200,100,0,0,'#4B3BFF');
-				addBox(100,100,100,200,200,'#8175FF');
-				addBox(100,50,100,-200,200,'#B6B0FF');
+				addBox(100,200,100,0,0,'#4B3BFF',"images/tag-cloud.png");
+				addBox(100,100,100,200,200,'#B6B0FF',"images/tag-cloud2.png");
+				addBox(100,50,100,-200,200,'#8175FF',"images/index.jpg");
 
 				window.addEventListener( 'resize', onWindowResize, false );
+				container.addEventListener( 'click', onDocumentMouseMove, false );
 
 				animate();
 
 			}
 
 			// Make objects clickable
-			var mouse = new THREE.Vector3(), INTERSECTED;
-			raycaster = new THREE.Raycaster();
-			container.addEventListener( 'click', onDocumentMouseMove, false );
-
 			function onDocumentMouseMove( event ) {
 				event.preventDefault();
 				// mouse.x = ( event.clientX / WIDTH ) * 2 - 1;
@@ -269,77 +268,71 @@
 				mouse.z = 0.5;
 				// find intersections
 				raycaster.setFromCamera( mouse, camera );
-				var intersects = raycaster.intersectObjects( objects );
-				if( intersects.length > 0 ){// if an object was clicked
+				var intersects = raycaster.intersectObjects( _.pluck(objects,'cube') );
+				if( intersects.length > 0 ) { // if an object was clicked
 
 					var intersect = intersects[ 0 ];
 					var newSelected = intersect.object;
+					var result = $.grep(objects, function(e){ return e.cube == newSelected; });
+					console.log(result[0]);
 					var color = newSelected.material.color.getHexString().toUpperCase();
 					var originalColor = newSelected.name;
 					var red = new THREE.Color( 0xFF0000 );
 
-					// change color of box
-					if(color != red.getHexString().toUpperCase()){
-						console.log("change from "+color+" to red "+ red.getHexString().toUpperCase());
+					if (selectedObjects.indexOf(newSelected) > -1){ // if clicked object is already selected
+						// deselect([newSelected]); //remove item from list
+						console.log("Deselect - change from "+red.getHexString().toUpperCase()+" to original "+originalColor);
+						newSelected.material.color.setHex( originalColor );
+						toggleTagCloud(0);
+						selectedObjects = [];
+					}
+					else {
+						if (selectedObjects.length > 0) { // if any other selected objects
+							// deselect(selectedObjects); //remove all items from list
+							var x;
+							for (x in selectedObjects) {
+								console.log("Deselect - change from "+red.getHexString().toUpperCase()+" to original "+selectedObjects[x].name);
+								selectedObjects[x].material.color.setHex( selectedObjects[x].name );
+								toggleTagCloud(0);
+								selectedObjects = [];
+							}
+						}
+						selectedObjects.push(newSelected);
+						console.log("Select  -  change from "+color+" to red "+ red.getHexString().toUpperCase());
 						newSelected.material.color.set( red );
+						document.getElementById("tag-cloud").src=result[0].tags;
 						toggleTagCloud(1);
 					}
-					else{
-						console.log("change from "+red.getHexString().toUpperCase()+" to original "+originalColor);
-						newSelected.material.color.set( originalColor );
-						if ( checkActiveBoxes() == false )
-							toggleTagCloud(0);
-					}
-					// newSelected.material.color.setHex( Math.random() * 0xffffff );
+
+
+					/*
+					if newSelected already in selectedObjects
+						deselect newSelected
+							- change color back to original
+							- hide tag cloud
+							- remove from/reset selectedObjects
+					else, newSelected not in selectedObjects
+						if selectedObjects is not empty
+							deselect all objects in selectedObjects
+						select newSelected
+							- add to selectedObjects
+							- change color to red
+							- show tag cloud
+					*/
 
 				}
-				else{
+				else {
 					console.log('you clicked nothing');
 				}
 
+			}
 
-				// var mouse3D = new THREE.Vector3( ( event.clientX / WIDTH ) * 2 - 1,   //x
-				//                                 -( event.clientY / HEIGHT ) * 2 + 1,  //y
-				//                                 0.5 );                                            //z
-				// projector.unprojectVector( mouse3D, camera );  
-				// // vector.unproject(mouse3D,camera); 
-				// mouse3D.sub( camera.position );                
-				// mouse3D.normalize();
-				// var raycaster = new THREE.Raycaster( camera.position, mouse3D );
-				// var intersects = raycaster.intersectObjects( objects );
-				// // Change color if hit block
-				// if ( intersects.length > 0 ) {
-				// 	console.log(intersects[ 0 ].object.name);
-				//     intersects[ 0 ].object.material.color.setHex( Math.random() * 0xffffff );
-				// }
-				// render();
+			function deselect( listItems ) {
 
 			}
 
-			function checkActiveBoxes() {
-				var active;
-				var box;
-				var red = new THREE.Color( 0xFF0000 );
-				for (box in objects){
-					console.log("box color: "+objects[box].material.color.getHexString().toUpperCase());
-					var color = objects[box].material.color.getHexString().toUpperCase();
-					if (color == red.getHexString().toUpperCase()){
-						active = 1;
-						break;
-					}
-				}
-				if (active == 1){
-					// console.log("true");
-					return true;
-				}
-				else{
-					// console.log("false");
-					return false;
-				}
 
-			}
-
-			function addBox( width, height, depth, xpos, ypos, color ){
+			function addBox( width, height, depth, xpos, ypos, color, tagCloud ){
 
 				var tpos = height/2;
 
@@ -347,17 +340,21 @@
 				var material =  new THREE.MeshLambertMaterial( { color: color} );
 				var cube = new THREE.Mesh( geometry, material );
 				cube.position.set(xpos,tpos,ypos);
-				cube.name = color;
+				cube.name = cube.material.color.getHex();
 
 				// var outlineMaterial1 = new THREE.MeshBasicMaterial( { color: 0xFFFF00, side: THREE.BackSide } );
 				// var outlineMesh1 = new THREE.Mesh( geometry, outlineMaterial1 );
 				// outlineMesh1.position.set(xpos,tpos,ypos);
 				// outlineMesh1.scale.multiplyScalar(1.05);
-				// scene.add( outlineMesh1 );				
+				// scene.add( outlineMesh1 );
+				
+				// objects.push( cube );				
+				var cubeObject = { tags: tagCloud, 
+								   color: cube.material.color.getHex(), 
+								   cube: cube }
+				objects.push(cubeObject); // list of objects
 
 				scene.add( cube );
-				objects.push( cube );
-				// console.log(cube.name)
 
 			}
 
@@ -383,7 +380,7 @@
 				if(dashed) {
 					mat = new THREE.LineDashedMaterial({ linewidth: 100, color: colorHex, dashSize: 3, gapSize: 3 });
 				} else {
-					mat = new THREE.LineBasicMaterial({ linewidth: 10, color: colorHex });
+					mat = new THREE.LineBasicMaterial({ linewidth: 100, color: colorHex });
 				}
 
 				geom.vertices.push( src.clone() );
@@ -399,11 +396,12 @@
 			function toggleTagCloud(onOff) { 
 				var e = document.getElementById("tag-cloud");
 
-				if(onOff == 1){
+				// 1 = turn on, 0 = turn off
+				if(onOff == 1) {
 					e.style.display = 'block';
 					// document.getElementById("tag-cloud-button").className += " active";					
 				}
-				else{
+				else {
 					e.style.display = 'none';
 					// tagCloudButton.setAttribute("class", "btn btn-primary btn-sm");					
 				}
@@ -423,11 +421,6 @@
 				// Recompute renderer dimensions
 				WIDTH = document.getElementById('visualization').offsetWidth;
 				HEIGHT = window.innerHeight - HEADERHEIGHT;
-
-				// Recompute offsets of renderer for clicking objects
-				// leftOffset = window.innerWidth - WIDTH - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
-				// topOffset = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top'));
-				// console.log("Resized: leftOffset: "+leftOffset, " topOffset: "+topOffset);
 
 				// Update camera and renderer
 				camera.aspect = WIDTH / window.innerHeight;

@@ -58,7 +58,9 @@ h3{
     top:0;
     right:0;
     display:none;
+    background-color: white;
     opacity:0.9;
+    width:300;
 }
 
 #tag-cloud-button  {
