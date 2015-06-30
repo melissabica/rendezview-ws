@@ -50,6 +50,7 @@
       init();
 
       function init() {
+        console.log("enter init")
 
         scene = new THREE.Scene();
 
@@ -143,6 +144,8 @@
         window.addEventListener( 'resize', onWindowResize, false );
 
         animate();
+
+        console.log("exit init");
 
       }
 
@@ -250,7 +253,7 @@
       function render() {
 
         renderer.render( scene, camera );
-        stats.update();
+        // stats.update();
       }
 
     </script>
