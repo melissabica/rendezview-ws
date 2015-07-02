@@ -10,16 +10,6 @@
 
 	<body>
 
-		<script src="fonts/helvetiker_regular.typeface.js"></script>
-		<script src="js/three.min.js"></script>
-		<script src="js/TrackballControls.js"></script>
-		<script src="js/OrbitControls.js"></script>
-		<script src="js/stats.min.js"></script>
-		<script src="js/Detector.js"></script>
-		<script src="js/d3.js"></script>
-		<script src="js/d3.layout.cloud.js"></script>
-		<script src="js/wordCloud.js"></script>
-
 		<script>
 
 			//GLOBAL VARIABLES
@@ -28,12 +18,12 @@
 			
 			// set dimensions of area for visualization
 			var WIDTH = document.getElementById('lower').offsetWidth;
-			// var leftOffset = window.innerWidth - WIDTH - document.getElementById("lower").style.paddingLeft;
 			var leftOffset = window.innerWidth - WIDTH - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
 			// var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
 			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 + 40; //fills whole screen height beneath header
+			console.log(HEADERHEIGHT);
 			var HEIGHT = window.innerHeight - HEADERHEIGHT;
-			var topOffset = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top'));
+			var topOffset = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top')) + document.getElementById('upper').offsetHeight;
 			// console.log(WIDTH, HEIGHT)
 			console.log("leftOffset: "+leftOffset, " topOffset: "+topOffset);
 
@@ -48,10 +38,9 @@
 				CANVAS_WIDTH = 100,
 				CANVAS_HEIGHT = 100,
 				CAM_DISTANCE = 300;
-			var objects = [], // list of all boxes
-				selectedObjects = []; //list of active (red) boxes
-			var tagCloud,
-				strArr = [];
+			var objects = [], // list of all objects
+				selectedObjects = []; //list of active (red) cubes
+			var tagCloud;
 			var mouse = new THREE.Vector2(), INTERSECTED;
 				raycaster = new THREE.Raycaster();
 
@@ -61,15 +50,12 @@
 
 				scene = new THREE.Scene();
 
-
 				// CAMERA
-
 				var VIEW_ANGLE = 45, ASPECT = WIDTH / HEIGHT, NEAR = 0.1, FAR = 20000;
 				camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 				scene.add(camera);
 				camera.position.set(0,1500,1500);
 				camera.lookAt(scene.position);	
-
 
 				// RENDERER
 				if ( Detector.webgl )
@@ -81,9 +67,7 @@
 				container = document.getElementById( 'visualization' );
 				container.appendChild( renderer.domElement );
 
-
 				// CONTROLS
-
 				controls = new THREE.OrbitControls( camera, renderer.domElement );
 				controls.maxPolarAngle = Math.PI/2;  //don't let camera go "underground"
 				controls.userPanSpeed = 10
@@ -94,7 +78,6 @@
 				// axes = new THREE.AxisHelper( 1000 );
 				// scene.add( axes );
 
-
 				// STATS
 
 				// stats = new Stats();
@@ -102,7 +85,6 @@
 				// stats.domElement.style.bottom = '0px';
 				// stats.domElement.style.zIndex = 100;
 				// container.appendChild( stats.domElement );
-
 
 				// LIGHT
 
@@ -121,7 +103,6 @@
 				directionalLight2.position.set( 3000, 10, -2000 );
 				scene.add( directionalLight2 );
 
-
 				// FLOOR
 				var floorTexture = new THREE.ImageUtils.loadTexture( 'images/map-mirror.png' );
 				floorTexture.wrapS = floorTexture.wrapT = THREE.ClampToEdgeWrapping; 
@@ -133,13 +114,11 @@
 				floor.rotation.x = Math.PI / 2;
 				scene.add(floor);
 
-
 				// SKYBOX
 				var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
 				var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, side: THREE.BackSide } );
 				var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
 				scene.add(skyBox);
-
 
 				//// INSET AXES ////
 				// CONTAINER
@@ -217,9 +196,10 @@
 				document.getElementById('visualization').appendChild(resetButton);
 				document.getElementById("reset-button").onclick = function() { 
 					console.log("reset camera view");
-					controls.center.set(0,0,0);
-					camera.position.set(0,1500,1500);
-					camera.lookAt(scene.position);
+					controls.reset();
+					// controls.center.set(0,0,0);
+					// camera.position.set(0,1500,1500);
+					// camera.lookAt(scene.position);
 					// http://stackoverflow.com/questions/16525043/reset-camera-using-orbitcontrols-js
 				}; 
 
@@ -228,10 +208,9 @@
 				tagCloud.setAttribute("id", "tag-cloud");
 				document.getElementById('visualization').appendChild(tagCloud);
 
-
 				//// ADD BOXES ////
-
-				addBox(100,200,100,0,0,'#4B3BFF',"(HT)HOSPITALITY:6 MS:1 MANAGER:1 SONIC:15 ASSISTANT:10");
+				//addBox( width, height, depth, xpos, ypos, color, tags )
+				addBox(100,200,100,0,10,'#4B3BFF',"(HT)HOSPITALITY:6 MS:1 MANAGER:1 SONIC:15 ASSISTANT:10");
 				addBox(100,100,100,200,200,'#B6B0FF',"UNITE:1 LONDON:1 BREAK:1 CENTRAL:1 GLAD:1 GUY:5 UNITE:6 (HT)SUMMER:1");
 				addBox(100,50,100,-200,200,'#8175FF',"HEART:1 CALL:5 DELETE:4 ANXIETY:3 GLAD:1 ENJOY:2");
 
@@ -252,62 +231,56 @@
 
 				// find intersections
 				raycaster.setFromCamera( mouse, camera );
+				scene.updateMatrixWorld();
 				var intersects = raycaster.intersectObjects( _.pluck(objects,'cube') );
 				if( intersects.length > 0 ) { // if an object was clicked
 
 					var intersect = intersects[ 0 ];
 					var newSelected = intersect.object;
 					// console.log(newSelected);
-					var result = $.grep(objects, function(e){ return e.cube == newSelected; }); //result[0] is clicked object in objects
+					var result = $.grep(objects, function(e){ return e.cube === newSelected; }); //result[0] is clicked object in objects
+					//finds object in objects that has a value for cube matching newSelected
+					//http://stackoverflow.com/questions/7364150/find-object-by-id-in-array-of-javascript-objects
+					var originalColor = result[0].color;
+					var tagStr = result[0].tags;
 					var color = newSelected.material.color.getHexString().toUpperCase();
-					var originalColor = newSelected.name;
 					var red = new THREE.Color( 0xFF0000 );
 
-					if (selectedObjects.indexOf(newSelected) > -1){ // if clicked object is already selected
-						// deselect([newSelected]); //remove item from list
+					if (selectedObjects.indexOf(result[0]) > -1){ // if clicked object is already selected
 						console.log("Deselect - change from "+red.getHexString().toUpperCase()+" to original "+originalColor);
-						newSelected.material.color.setHex( result[0].color );
+						newSelected.material.color.setHex( originalColor );
 						if(selectedObjects.length == 1) { // if no other objects are selected
 							toggleTagCloud(0);
 							selectedObjects =  [];
-							strArr = [];
-							// document.getElementById("tag-cloud").innerHTML = "";							
+							console.log("hide tag cloud")
 						}
-						else { // if other objects are still selected
-							var index1 = strArr.indexOf(result[0].tags);
-							strArr.splice(index1,1);
-							var index2 = selectedObjects.indexOf(newSelected);
-							selectedObjects.splice(index2,1);
-							// document.getElementById("tag-cloud").innerHTML = "";
+						else { // if other objects are still selected, remove newSelected and update word cloud
+							var index = selectedObjects.indexOf(result[0]);
+							selectedObjects.splice(index,1);
 							toggleTagCloud(0);
-							createWordCloud(strArr);
+							createWordCloud(_.pluck(selectedObjects,'tags'));
 							toggleTagCloud(1);
 						}
-
-
 					}
 
 					else { // if selecting new object
 						if (selectedObjects.length > 0 && !(event.shiftKey)) { // if objects are already selected, and not pressing shift key
 							for (var x in selectedObjects) { //clear selected objects
-								console.log("Deselect - change from "+red.getHexString().toUpperCase()+" to original "+selectedObjects[x].name);
-								selectedObjects[x].material.color.setHex( selectedObjects[x].name );
+								console.log("Deselect - change from "+red.getHexString().toUpperCase()+" to original "+selectedObjects[x].color);
+								selectedObjects[x].cube.material.color.setHex( selectedObjects[x].color );
 							}
 							toggleTagCloud(0);
 							selectedObjects = [];
-							strArr = [];
-							// document.getElementById("tag-cloud").innerHTML = "";
-							
 						}
 
 						// select the new object
-						selectedObjects.push(newSelected);
-						// console.log(selectedObjects);
+						selectedObjects.push( result[0] );
+						console.log("selected object",result[0])
 						console.log("Select  -  change from "+color+" to red "+red.getHexString().toUpperCase());
 						newSelected.material.color.set( red );
-						strArr.push(result[0].tags);
 						toggleTagCloud(0);
-						createWordCloud(strArr);
+						console.log("tags array",_.pluck(selectedObjects,'tags'));
+						createWordCloud(_.pluck(selectedObjects,'tags'));
 						toggleTagCloud(1);
 					}
 
@@ -352,20 +325,16 @@
 				cube.position.set(xpos,tpos,ypos);
 				cube.name = cube.material.color.getHex();
 
-				// var tag = function //converts into format [{"text":"study","size":40}...]
-
 				// var outlineMaterial1 = new THREE.MeshBasicMaterial( { color: 0xFFFF00, side: THREE.BackSide } );
 				// var outlineMesh1 = new THREE.Mesh( geometry, outlineMaterial1 );
 				// outlineMesh1.position.set(xpos,tpos,ypos);
 				// outlineMesh1.scale.multiplyScalar(1.05);
 				// scene.add( outlineMesh1 );
 				
-				// objects.push( cube );				
-				var cubeObject = { tags: tags, //change to data structure tag
-								   color: cube.material.color.getHex(), 
-								   cube: cube }
+				var cubeObject = { tags: tags, //string
+								   color: cube.material.color.getHex(), //number
+								   cube: cube }; //object
 				objects.push(cubeObject); // list of objects
-
 				scene.add( cube );
 
 			}
@@ -450,6 +419,8 @@
 			}
 
 		</script>
+		<!-- // <script src="js/wordCloud.js"></script> -->
+
 
 	</body>
 </html>

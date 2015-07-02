@@ -1,0 +1,125 @@
+.indented{
+   padding-left: 30pt;
+}
+
+.indentedui{
+   padding-left: 15pt;
+}
+
+h3{
+	padding-top: 10pt;
+	padding-bottom: 0pt;
+}
+
+.subtitle{
+	padding-top: 0pt;
+	padding-bottom: 0pt;
+}
+
+.content{
+	background-color: #000000;
+}
+
+#visualization{
+    position:relative;
+}
+
+#inset-axes  {
+    width: 100px;
+    height: 100px;
+    /*background-color: #f00;  or transparent; will show through only if renderer alpha: true */
+    /*background-color: rgba(0,0,0, 0.5);*/
+    background-color: rgba(255,255,255, 0.9);    
+    border: 1px solid black; /* or none; */
+    margin: 20px;
+    padding: 0px;
+    position: absolute;
+    left: 0px;
+    bottom: 5px;
+    text-align:center;
+    /*z-index: 1000;*/
+}
+
+#time-label {
+    position: absolute;
+    /*z-index: 1;*/
+    font-size: 12px;
+    text-align:center;
+    left:0;
+    right:0;
+    margin-left:auto;
+    margin-right:auto;
+}
+/* Centering: http://stackoverflow.com/questions/1776915/how-to-center-absolute-element-in-div*/
+
+#tag-cloud  {
+    border: 1px solid black;
+    position: absolute;
+    top:0;
+    right:0;
+    display:none;
+    background-color: white;
+    opacity:0.9;
+}
+
+#tag-cloud-button  {
+    position: absolute;
+    bottom:5px;
+}
+
+
+#reset-button  {
+    position: absolute;
+    bottom:5px;
+    right:0;
+}
+
+
+/* Simple Sidebar */
+
+.sidebar-nav li h5 {
+    color: #999999;
+    line-height: auto;
+    /*font-weight: bold;*/
+}
+
+.sidebar-nav li .search-btn .reset-btn {
+    margin-top:10px;
+}
+
+.sidebar-nav input[type="radio"]{
+  margin: 0 5px 0 10px;
+}
+
+.sidebar-nav label{
+    color: #999999;
+    font-weight: normal;
+}
+
+#sidebar-wrapper {
+    overflow-x: hidden;
+}
+
+#date-range-field span{
+    color: #BBBBBB;
+    font-size: 12px;
+}
+
+/*.sidebar-nav li a:hover {*/
+    /*background: -moz-linear-gradient(right, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 90%); /* For Firefox 3.6 to 15 */
+    /*background: linear-gradient(to right, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 90%); /* Standard syntax (must be last) */    
+/*}*/
+
+.number {
+  font-size: 100px;
+}
+
+/* Pages.css */
+
+.container-fluid{
+    padding-left: 0px;
+}
+
+.row{
+    margin: 0px;
+}
