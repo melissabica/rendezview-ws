@@ -1,18 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-		  body {margin:1000;overflow:hidden;}
-		  /*canvas {display:block;}*/
-		</style> 		
-	</head>
-
-	<body>
-
-		<script>
-
-			//GLOBAL VARIABLES
+//GLOBAL VARIABLES
 			var container, stats;
 			var camera, controls, scene, renderer;
 			
@@ -440,12 +426,3 @@
 			// addBox(100,200,100,0,10,'#4B3BFF',"(HT)HOSPITALITY:6 MS:1 MANAGER:1 SONIC:15 ASSISTANT:10");
 			addBox(100,100,100,200,200,'#B6B0FF',"UNITE:1 LONDON:1 BREAK:1 CENTRAL:1 GLAD:1 GUY:5 UNITE:6 (HT)SUMMER:1");
 			addBox(100,50,100,-200,200,'#8175FF',"HEART:1 CALL:5 DELETE:4 ANXIETY:3 GLAD:1 ENJOY:2");
-
-		</script>
-		<!-- // <script src="js/wordCloud.js"></script> -->
-
-
-	</body>
-</html>
-
-<!-- https://github.com/stemkoski/stemkoski.github.com/blob/master/Three.js/HelloWorld.html -->

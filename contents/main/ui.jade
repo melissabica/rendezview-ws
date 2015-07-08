@@ -36,7 +36,9 @@ head
 						label(for='pattern-outlier') Outlier
 
 					li
-						input.btn.btn-primary.search-btn(type='button', value='Search', onClick='main.search($("input[name=keywords]").val(), $("input[name=parameters]").val());  main.date($("#date-range-label").text());  main.pattern($("input[name=pattern]:checked", "#searchOptions").val());  console.log();')
+						input.btn.btn-primary.search-btn(type='button', value='Search', onClick='main.search($("input[name=keywords]").val(), $("input[name=parameters]").val(), $("#date-range-label").text(), $("input[name=pattern]:checked", "#searchOptions").val()); console.log();')
+
+						//main.date($("#date-range-label").text());  main.pattern($("input[name=pattern]:checked", "#searchOptions").val());
 
 						button.btn.btn-default.reset-btn(type='reset', value='Reset', onclick='clearDatePicker()') Clear
 		// end sidebar-wrapper
@@ -52,10 +54,11 @@ head
 					mode: 'range',
 					current: new Date(to.getFullYear(), to.getMonth(), 1),
 					onChange: function(dates,el) {
-						// update the range display
+						// update the range display: MMM DD, YYYY - MMM DD, YYYY
 						$('#date-range-field span').text(
 							dates[0].getMonthName(false)+' '+dates[0].getDate()+', '+dates[0].getFullYear()+' - '+
-							dates[1].getMonthName(false)+' '+dates[1].getDate()+', '+dates[1].getFullYear());
+							dates[1].getMonthName(false)+' '+dates[1].getDate()+', '+dates[1].getFullYear()
+						);
 					}
 				});
 			});

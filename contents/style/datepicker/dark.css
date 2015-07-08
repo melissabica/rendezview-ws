@@ -10,7 +10,8 @@
   top: 0;
   right: 10px;
   height: 10px;
-  background: url(img/datepicker_t.png);
+  border-top: 1px solid #585858;
+  /*background: url(img/datepicker_t.png);*/
 }
 .datepickerBorderB {
   display:block;
@@ -19,7 +20,8 @@
   bottom: 0;
   right: 10px;
   height: 10px;
-  background: url(img/datepicker_b.png);
+  border-bottom: 1px solid #585858;
+  /*background: url(img/datepicker_b.png);*/
 }
 .datepickerBorderL {
   display:block;
@@ -28,7 +30,8 @@
   bottom: 10px;
   top: 10px;
   width: 10px;
-  background: url(img/datepicker_l.png);
+  border-left: 1px solid #585858;
+  /*background: url(img/datepicker_l.png);*/
 }
 .datepickerBorderR {
   display:block;
@@ -37,7 +40,8 @@
   bottom: 10px;
   top: 10px;
   width: 10px;
-  background: url(img/datepicker_r.png);
+  border-right: 1px solid #585858;
+  /*background: url(img/datepicker_r.png);*/
 }
 .datepickerBorderTL {
   display:block;
@@ -46,7 +50,9 @@
   left: 0;
   width: 10px;
   height: 10px;
-  background: url(img/datepicker_tl.png);
+  border-top: 1px solid #585858;
+  border-left: 1px solid #585858;
+  /*background: url(img/datepicker_tl.png);*/
 }
 .datepickerBorderTR {
   display:block;
@@ -55,7 +61,9 @@
   right: 0;
   width: 10px;
   height: 10px;
-  background: url(img/datepicker_tr.png);
+  border-top: 1px solid #585858;
+  border-right: 1px solid #585858;
+  /*background: url(img/datepicker_tr.png);*/
 }
 .datepickerBorderBL {
   display:block;
@@ -64,7 +72,9 @@
   left: 0;
   width: 10px;
   height: 10px;
-  background: url(img/datepicker_bl.png);
+  border-bottom: 1px solid #585858;
+  border-left: 1px solid #585858;
+  /*background: url(img/datepicker_bl.png);*/
 }
 .datepickerBorderBR {
   display:block;
@@ -73,7 +83,9 @@
   right: 0;
   width: 10px;
   height: 10px;
-  background: url(img/datepicker_br.png);
+  border-bottom: 1px solid #585858;
+  border-right: 1px solid #585858;
+  /*background: url(img/datepicker_br.png);*/
 }
 div.datepicker a {
   color: #eeeeee;

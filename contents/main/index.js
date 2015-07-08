@@ -33,34 +33,93 @@ var main = {
 
     },
 
-    search: function(keyword, param) {
+    search: function(keywords, param, dateRange, patternType) {
 
         removeBoxes();
 
-        var keyword = keyword.split(',') || ['keyword'];
-        console.log("Keyword(s): "+keyword);
-        // for(var x=0; x<keyword.length; x++){
-        //     console.log("Keyword: "+keyword[x]);
-        // }
-        var param = param || 'param';
+        var param = param;
         console.log("Parameter: "+param);
+
+        var dateRange, start, end;
+        if(dateRange){
+            dateRange = dateRange.split(" - "); //dateRange[0] = st, dateRange[1] = et
+            start = moment(dateRange[0], "MMM DD, YYYY").format("[']YYYY-MM-DD[']");
+            end = moment(dateRange[1], "MMM DD, YYYY").format("[']YYYY-MM-DD[']");
+            console.log("Start: "+start);
+            console.log("End:   "+end);
+        }
+
+        if (keywords){
+            var keywords = keywords.split(',');
+            //normalize keywords to uppercase
+            for(var i=0; i<keywords.length; i++){
+                keywords[i] = "\'"+keywords[i].toUpperCase()+"\'";
+                // console.log(typeof keywords[i], keywords[i]);
+            }
+            console.log("Keyword(s): "+keywords);
+            console.log("Keywords length "+keywords.length);
+        }
+
+        var patternType = patternType;
+        console.log("Pattern type: "+patternType);
+
+
+        var query = "select word, st, et, value, type, geom, tags from LOCALFORM where"
+        var flag = 0;
+
+        if(patternType.toUpperCase() === "FLOCK"){
+            query += " type in ['HH', 'LL']";
+        }
+        else{
+            query += " type in ['HL', 'LH']";
+        }
+        if(dateRange){
+            query += " and st > "+start+" and et < "+end;
+            flag = 1;
+        }
+        if(param){
+            if (flag == 1){
+                query += " and";
+            }
+            query += " param = '"+param+"'";
+            flag = 1;
+        }
+        if(keywords){
+            if (flag == 1){
+                query += " and";
+            }            
+            query += " word in ["+keywords+"]";
+            flag = 1;
+        }
+        //select word, st, et, value, type, geom, tags from LOCALFORM where word IN ['OPEN','WORK'] and st > '2015-06-19' limit -1
+
+        console.log("Query: ",query+" limit -1");
+
 
         $.get("main/localform.json.data", function(data) {
 
             var results = JSON.parse(data);
             var result = results.result;
-            console.log(result);
+            // console.log(result);
 
             var count = 0;
 
             for (var i=0; i<result.length; i++) {
-                idx = keyword.indexOf(result[i].word.toLowerCase());
+                idx = keywords.indexOf("\'"+result[i].word.toUpperCase()+"\'");
                 if (idx > -1) {
+                    count++;
                     //( width, height, depth, xpos, ypos, color, tags )
+                    findCoords(result[i].geom);
                     addBox(Math.floor(Math.random()*101), Math.floor(Math.random()*101), Math.floor(Math.random()*101), Math.floor(Math.random()*1001)-500, Math.floor(Math.random()*801)-400, "#4B3BFF",result[i].tags);
-                    // addBox(100,200,100,-100,10,ColorLuminance("0000ff",(result[i].value*1000)),result[i].tags);    
+                    // addBox(100,200,100,-100,10,ColorLuminance("0000ff",(result[i].value*1000)),result[i].tags);
+                    // break;
                 }
+                else{
+                    // console.log(keywords, result[i].word.toUpperCase());
+                }
+
             }
+            console.log(count+" results");
         })
 
         //NOT WORKING
@@ -83,8 +142,11 @@ var main = {
 
     date: function(dateRange) {
 
-        var dateRange = dateRange;
-        console.log("Date range: "+dateRange);
+        var dateRange = dateRange.split(" - "); //dateRange[0] = st, dateRange[1] = et
+        var start = moment(dateRange[0], "MMM DD, YYYY").format("YYYY-MM-DD");
+        var end = moment(dateRange[1], "MMM DD, YYYY").format("YYYY-MM-DD");
+        console.log("Start: "+start);
+        console.log("End:   "+end);
     },
 
     pattern: function(patternType) {
@@ -114,4 +176,10 @@ function ColorLuminance(hex, lum) {
     }
 
     return rgb;
+}
+
+function findCoords(wktString) {
+    //"POLYGON(( -75.556703 40.380221, -73.756444 40.380221, -73.756444 40.907506, -75.556703 40.907506, -75.556703 40.380221))"
+    // newStr = wktString.split(', ');
+    // console.log(newStr);
 }
