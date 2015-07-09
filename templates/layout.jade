@@ -2,7 +2,7 @@ doctype html
 html(lang='en')
   head
     title Rendezview
-    base(href='/sophy/')
+    base(href='/rendezview/')
     meta(charset='utf-8')
     meta(http-equiv='X-UA-Compatible', content='IE=edge,chrome=1')
     meta(name='viewport', content='width=device-width')
@@ -24,17 +24,27 @@ html(lang='en')
         //include navbar
 
 
+    div#content
+        div#wrapper
+            div#ui
+            div#page-content-wrapper
+                div#container-fluid
+                    .row#upper
+                    .row#lower
+                        div#visualization
+                        div#inset-axes
+
 
     // third-party libraries
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
     script(src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js")
     script(src="js/jade.js")  
     script(src="js/lodash.min.js")
-    script(src="js/three.min.js")
+    script(src="//cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js")
     script(src="style/bootstrapv3/fonts/helvetiker_regular.typeface.js")
     script(src="js/OrbitControls.js")
     script(src="js/Detector.js")
-    script(src="js/d3.js")
+    script(src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js")
     script(src="js/d3.layout.cloud.js")
     script(src="js/wordCloud.js")
     script(src="js/datepicker.js")
@@ -48,6 +58,3 @@ html(lang='en')
     
     // main app
     script(src="js/app.js")
-
-    div#content
-        include content
