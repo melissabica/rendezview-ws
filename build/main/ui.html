@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <ul class="sidebar-nav">
+            <li class="sidebar-brand">
+                <a href="#">
+                    Rendezview
+                </a>
+            </li>
+            <form autocomplete="off">
+            <li>
+                <h5>Parameters</h5>
+                <input type="text" name="Parameters" value=""><br>
+            </li>
+            <li>
+                <h5>Date Range</h5>
+                  <div id="date-range" name="DateRange">
+                    <div id="date-range-field">
+                      <span id="date-range-label"></span>
+                      <!-- <a href="#">&#9660;</a> -->
+                    </div>
+                    <div id="datepicker-calendar"></div>
+                  </div>
+            </li>
+            <li>
+                <h5>Input Keywords (max=3 using ' ')</h5>
+                <input type="text" name="Keywords" value=""><br>
+            </li>
+            <li>
+                <h5>Pattern Type</h5>
+                    <input type="radio" name="pattern" value="flock" checked><label for="pattern-flock">Flock</label>
+                    <input type="radio" name="pattern" value="outlier"><label for="pattern-outlier">Outlier</label>
+            </li>
+            <li>
+                <!-- <a href="#" class="btn btn-default search-btn"><span class="glyphicon glyphicon-search"></span> Search</a> -->
+                <input type="button" class="btn btn-primary search-btn" value="Search">
+                <button type="reset" class="btn btn-default reset-btn" value="Reset" onclick="clearDatePicker()">Clear</button>
+            </li>
+            </form>
+        </ul>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <script type="text/javascript">
+      $(document).ready(function() { 
+        var to = new Date();
+        var from = new Date(to.getTime());
+
+        $('#datepicker-calendar').DatePicker({
+          inline: true,
+          date: [from, to],
+          calendars: 1,
+          mode: 'range',
+          current: new Date(to.getFullYear(), to.getMonth(), 1),
+          onChange: function(dates,el) {
+            // update the range display
+            $('#date-range-field span').text(
+              dates[0].getMonthName(false)+' '+dates[0].getDate()+', '+dates[0].getFullYear()+' - '+
+              dates[1].getMonthName(false)+' '+dates[1].getDate()+', '+dates[1].getFullYear());
+          }
+        });
+      });
+      
+      function clearDatePicker() { 
+        $('#datepicker-calendar').DatePickerClear();
+        $("#date-range-label").html("");
+      };
+
+    </script>
+
+</body>
+
+</html>

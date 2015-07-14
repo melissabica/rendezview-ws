@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Mouseover (Three.js)</title>
+</head>
+<body>
+	<!-- <a id='reset' href="#" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-refresh"></span> Reset View</a> -->
+	<a id="menu-toggle" href="#menu-toggle" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-menu-hamburger"></span> </a>
+	<script>
+		var button = document.getElementById('menu-toggle');
+		document.getElementById('upper').appendChild(button);
+	</script>
+	<script>
+        $("#menu-toggle").click(function(e) {
+            e.preventDefault();
+            $("#wrapper").toggleClass("toggled");
+            onWindowResize();
+        });    
+    </script>
+</body>
+</html>

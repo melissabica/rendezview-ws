@@ -1,4 +1,7 @@
 {
+	"require": {
+		"Slider": "bootstrap-slider"
+	},	
     "baseUrl": "/rendezview/",
     "port": 3000
 }

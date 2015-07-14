@@ -13,15 +13,15 @@ html(lang='en')
     link(href="style/bootstrapv3/css/custom.css", rel="stylesheet", type="text/css")
     link(rel="stylesheet", type="text/css", href="style/datepicker/base.css")
     link(rel="stylesheet", type="text/css", href="style/datepicker/dark.css")
-    //link(href="style/pages/css/pages.css", rel="stylesheet", type="text/css")
+    //- link(href="style/pages/css/pages.css", rel="stylesheet", type="text/css")
 
   body
 
-    //div#page
-        //h1#header Rendezview
-            //a.btn.btn-default.btn-lg(href='#', style='{display: inline-block;}')
-                //span.glyphicon.glyphicon-menu-hamburger
-        //include navbar
+    //-div#page
+        //-h1#header Rendezview
+            //-a.btn.btn-default.btn-lg(href='#', style='{display: inline-block;}')
+                //-span.glyphicon.glyphicon-menu-hamburger
+        //-include navbar
 
 
     div#content
@@ -35,12 +35,13 @@ html(lang='en')
                         div#inset-axes
 
 
-    // third-party libraries
-    script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js")
+    //- third-party libraries
+    script(src="//code.jquery.com/jquery-1.11.3.min.js")
     script(src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js")
     script(src="js/jade.js")  
     script(src="js/lodash.min.js")
-    script(src="//cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js")
+    //- script(src="//cdnjs.cloudflare.com/ajax/libs/three.js/r71/three.min.js")
+    script(src="js/three.min.js")    
     script(src="style/bootstrapv3/fonts/helvetiker_regular.typeface.js")
     script(src="js/OrbitControls.js")
     script(src="js/Detector.js")
@@ -48,13 +49,19 @@ html(lang='en')
     script(src="js/d3.layout.cloud.js")
     script(src="js/wordCloud.js")
     script(src="js/datepicker.js")
+    script(src="js/CanvasRenderer.js")
+    script(src="js/Projector.js")
+    //- script(src="http://cdn.jquerytools.org/1.2.6/full/jquery.tools.min.js")
+    script(src="js/jquery.json-2.2.min.js")
 
-    //script(src="js/threeGeoJSON.js")
-    //script(src="js/stats.min.js")
-    //script(src="js/orientdb-api.js")  
 
-    // our app
+
+    script(src="js/threeGeoJSON.js")
+    //- script(src="js/stats.min.js")
+    script(src="js/orientdb-api.js")  
+
+    //- our app
     script(src="main/index.js")
     
-    // main app
-    script(src="js/app.js")
+    //- main app
+    //- script(src="js/app.js")

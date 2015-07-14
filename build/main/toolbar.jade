@@ -1,0 +1,17 @@
+doctype html(lang='en')
+head
+	body
+		// <a id='reset' href="#" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-refresh"></span> Reset View</a>
+		a#menu-toggle.btn.btn-default.btn-sm(href='#menu-toggle')
+			span.glyphicon.glyphicon-menu-hamburger
+
+		script.
+			var button = document.getElementById('menu-toggle');
+			document.getElementById('upper').appendChild(button);
+			
+		script.
+			$("#menu-toggle").click(function(e) {
+				e.preventDefault();
+				$("#wrapper").toggleClass("toggled");
+				onWindowResize();
+			});

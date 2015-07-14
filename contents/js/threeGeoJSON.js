@@ -202,8 +202,8 @@ function convertToPlaneCoords(coordinates_array, radius) {
     var lon = coordinates_array[0];
     var lat = coordinates_array[1];
         
-    z_values.push((lat/180) * radius);
-    y_values.push((lon/180) * radius);    
+    x_values.push(2200+(lat/180) * -radius); // y-axis (blue)
+    y_values.push(5400+(lon/180) * radius);  // x-axis (red)
 }
 
 function drawParticle(x, y, z, options) {
@@ -241,3 +241,5 @@ function clearArrays() {
     y_values.length = 0;
     z_values.length = 0;    
 }
+
+

@@ -73,7 +73,7 @@
 				controls.userPanSpeed = 10
 
 				// Add axes
-				axes = buildAxes( 1000 );
+				var axes = buildAxes( 1000 );
 				scene.add( axes );
 				// axes = new THREE.AxisHelper( 1000 );
 				// scene.add( axes );
@@ -104,28 +104,28 @@
 				scene.add( directionalLight2 );
 
 				// FLOOR
-				var floorTexture = new THREE.ImageUtils.loadTexture( 'images/map-mirror2.png' );
-				floorTexture.wrapS = floorTexture.wrapT = THREE.ClampToEdgeWrapping; 
-				floorTexture.minFilter = THREE.NearestFilter;
-				var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
-				var floorGeometry = new THREE.PlaneBufferGeometry(2000, 1237);
-				var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-				floor.position.y = -1; //originally -0.5
-				floor.rotation.x = Math.PI / 2;
-				scene.add(floor);
+				// var floorTexture = new THREE.ImageUtils.loadTexture( 'images/map-mirror2.png' );
+				// floorTexture.wrapS = floorTexture.wrapT = THREE.ClampToEdgeWrapping; 
+				// floorTexture.minFilter = THREE.NearestFilter;
+				// var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
+				// var floorGeometry = new THREE.PlaneBufferGeometry(2000, 1237);
+				// var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+				// floor.position.y = 0; //originally -0.5
+				// floor.rotation.x = Math.PI / 2;
+				// scene.add(floor);
 
 
-	            // var test_json = $.getJSON("images/us.geojson", function (data) { 
-	            //     drawThreeGeo(data, 5000, 'plane', {
-	            //         color: 'white'
-	            //     })    
-	            // });    
+	            var test_json = $.getJSON("images/us.geojson", function (data) { 
+	                drawThreeGeo(data, 10000, 'plane', {
+	                    color: 'white'
+	                })    
+	            });    
 
 				// SKYBOX
-				var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
-				var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x000000, side: THREE.BackSide } );
-				var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
-				scene.add(skyBox);
+				// var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
+				// var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x0000FF, side: THREE.BackSide } );
+				// var skyBox = new THREE.Mesh( skyBoxGeometry, skyBoxMaterial );
+				// scene.add(skyBox);
 
 				//// INSET AXES ////
 				// CONTAINER
@@ -152,7 +152,9 @@
 				camera2.up = camera.up; // important!
 
 				// AXES
-				axes2 = new THREE.AxisHelper( 100 );
+				// axes2 = new THREE.AxisHelper( 100 );
+				// scene2.add( axes2 );
+				axes2 = buildAxes( 100 );
 				scene2.add( axes2 );
 
 				// AXIS LABELS
@@ -321,6 +323,7 @@
 			function addBox( width, height, depth, xpos, ypos, color, tags ){
 
 				var tpos = height/2;
+				// var tpos = height/2 + Math.floor((Math.random() * 1000));
 
 				var geometry = new THREE.BoxGeometry( width,height,depth); 
 				var color = new THREE.Color( color );
@@ -375,9 +378,9 @@
 					mat; 
 
 				if(dashed) {
-					mat = new THREE.LineDashedMaterial({ linewidth: 100, color: colorHex, dashSize: 3, gapSize: 3 });
+					mat = new THREE.LineDashedMaterial({ linewidth: 1, color: colorHex, dashSize: 3, gapSize: 3 });
 				} else {
-					mat = new THREE.LineBasicMaterial({ linewidth: 100, color: colorHex });
+					mat = new THREE.LineBasicMaterial({ linewidth: 1, color: colorHex });
 				}
 
 				geom.vertices.push( src.clone() );

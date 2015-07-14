@@ -306,7 +306,8 @@ function deselect( listItems ) {
 
 function addBox( width, height, depth, xpos, ypos, color, tags ){
 
-	var tpos = height/2;
+	var tpos = height/2 + Math.floor((Math.random() * 100));
+	console.log("TPOS ",tpos);
 
 	var geometry = new THREE.BoxGeometry( width,height,depth); 
 	var color = new THREE.Color( color );
