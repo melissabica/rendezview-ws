@@ -69,7 +69,7 @@ h3{
     right: 0;
     height: 125px;
     width: 202px;
-    display: block;
+    display: none;
     background-color: white;
     opacity:0.9;
 }

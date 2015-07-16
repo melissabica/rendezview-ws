@@ -1,4 +1,4 @@
-function toggleTagCloud(onOff) { 
+function toggleSelectInfo(onOff) { 
 	var e = document.getElementById("tag-cloud");
 	var map = document.getElementById("inset-map");
 

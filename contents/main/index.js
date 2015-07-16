@@ -37,6 +37,8 @@ var main = {
 
 		// Clear map
 		removeBoxes();
+		removeInsetBoxes();
+		toggleSelectInfo(0);
 		var kwColors = {};
 
 		// Format inputs for the query
@@ -117,29 +119,18 @@ var main = {
 					moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY")) >= 0 && // start date matches
 					moment(dateRange[1], "MMM DD, YYYY").diff(moment(result[i].et)) >= 0 && // end date matches
 					types.indexOf(result[i].type) > -1 && // type matches
-					result[i].value >= param
+					result[i].value >= param // value matches
 				   ) {
 
 					count++;
 
-					// console.log(result[i].value);
-
 					var dataTimeRange = moment(result[i].et).diff(moment(result[i].st),'minutes');
-					// console.log(result[i].st+" - "+result[i].et);
-					// console.log("Difference: ",dataTimeRange);
-
 					var timeFromStart = (moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY"),'minutes'));
-					// console.log(start +', '+ result[i].st);
-					// console.log("Time from start: ", timeFromStart);
+					var latsLons = findCoords(result[i].geom);
+					console.log("geom ",result[i].geom);
 
-					// console.log(end + ', '+ result[i].et);
-					// var timeToEnd = ( moment(dateRange[1], "MMM DD, YYYY").diff(moment(result[i].et), 'minutes') );
-					// console.log("Time to end: ", timeToEnd);
 
-					// console.log(result[i].geom);
-					latsLons = findCoords(result[i].geom);
-					// console.log(latsLons.lat1);
-
+					// Boxes for main map
 					var width = translateLonToX(latsLons.lon2) - translateLonToX(latsLons.lon1); //x-axis (red)
 					var depth = translateLatToY(latsLons.lat1) - translateLatToY(latsLons.lat2); // y-axis (blue)
 					var height = (dataTimeRange / tAxisTimeRange) * 2000; // t-axis (green)
@@ -150,11 +141,8 @@ var main = {
 
 					// var newColor = ColorLuminance('5E35C6', result[i].value*100);
 					var newColor = ColorLuminance(String(kwColors[("\'"+result[i].word.toUpperCase()+"\'")]), result[i].value*100);
-					// console.log("color: ",String(kwColors[("\'"+result[i].word.toUpperCase()+"\'")]));
 
-					addBox(width, depth, height, xpos, ypos, tpos, newColor, result[i].tags);
-					// addBox( width, depth, height, xpos, ypos, mytpos, color, tags )
-					// POLYGON(( -75.556703 40.380221, -73.756444 40.380221, -73.756444 40.907506, -75.556703 40.907506, -75.556703 40.380221))
+					addBox(width, depth, height, xpos, ypos, tpos, newColor, result[i].tags, result[i].geom);
 
 					// break;
 				}
@@ -193,6 +181,7 @@ var main = {
 	}
 }
 
+// Main map translations
 function translateLonToX(lon) {
 	return (4700+(lon/210) * 10000);
 }
@@ -201,8 +190,31 @@ function translateLatToY(lat) {
 	return (2200+(lat/180) * -10000); 
 }
 
+// Inset map translations
+function translateLonToX2(lon) {
+    return (2300+(lon/210) * 5000);
+}
+
+function translateLatToY2(lat) {
+	return (-950+(lat/180) * 5000);
+}
+
 function midpoint(point1, point2) {
 	return ((point1 + point2) / 2);
+}
+
+function addInsetMapBox(geom) {
+	var latsLons = findCoords(geom);
+
+	var width = translateLonToX2(latsLons.lon2) - translateLonToX2(latsLons.lon1);
+	var depth = translateLatToY2(latsLons.lat1) - translateLatToY2(latsLons.lat2);
+	var height = 10;
+
+	var xpos = translateLonToX2( midpoint(latsLons.lon1, latsLons.lon2) );
+	var ypos = translateLatToY2( midpoint(latsLons.lat1, latsLons.lat2) );
+	var tpos = 5;
+
+	addBox2(width, depth, height, xpos, ypos, tpos, "#FF0000");
 }
 
 function ColorLuminance(hex, lum) {

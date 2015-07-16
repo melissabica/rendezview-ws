@@ -258,20 +258,11 @@
 
 				// CAMERA
 				camera3 = new THREE.PerspectiveCamera( 90, INSET_MAP_WIDTH / INSET_MAP_HEIGHT, 1, 2000 );
-				// camera3.up = camera.up; // important!
 				camera3.position.z = 550;
-				// camera3.lookAt(scene3);
 
-				// AXES
-				// axes3 = buildAxes( 100, 100, 100 );
-				// scene3.add( axes3 );
+				var lightInset = new THREE.AmbientLight( 0xEEEEEE );
+				scene3.add( lightInset );
 
-	            // var test_json3 = $.getJSON("images/us.geojson", function (data) { 
-	            //     drawThreeGeo(scene3, data, 5000, 'plane', {
-	            //         color: 'red'
-	            //     })    
-	            // });
-				
 				createInsetMap();
 
 				window.addEventListener( 'resize', onWindowResize, false );
@@ -280,6 +271,20 @@
 				animate();
 
 			}
+
+
+					// // Boxes for inset map
+					// var width2 = translateLonToX2(latsLons.lon2) - translateLonToX2(latsLons.lon1);
+					// var depth2 = translateLatToY2(latsLons.lat1) - translateLatToY2(latsLons.lat2);
+					// var height2 = 10;
+
+					// var xpos2 = translateLonToX2( midpoint(latsLons.lon1, latsLons.lon2) );
+					// var ypos2 = translateLatToY2( midpoint(latsLons.lat1, latsLons.lat2) );
+					// var tpos2 = 5;
+
+					// addBox2(width2, depth2, height2, xpos2, ypos2, tpos2, "#FF0000");			
+
+
 
 			// Make objects clickable
 			function onDocumentMouseMove( event ) {
@@ -310,28 +315,29 @@
 					if (selectedObjects.indexOf(result[0]) > -1){ // if clicked object is already selected
 						console.log("Deselect - change from "+red.getHexString().toUpperCase()+" to original "+originalColor);
 						newSelected.material.color.setHex( originalColor );
-						if(selectedObjects.length == 1) { // if no other objects are selected
-							toggleTagCloud(0);
-							selectedObjects =  [];
+						if(selectedObjects.length == 1) { // if no other objects are selected, remove clicked object
+							removeInsetBoxes();
+							toggleSelectInfo(0);
+							selectedObjects = [];
 							console.log("hide tag cloud")
 						}
 						else { // if other objects are still selected, remove newSelected and update word cloud
 							var index = selectedObjects.indexOf(result[0]);
 							selectedObjects.splice(index,1);
-							toggleTagCloud(0);
+							toggleSelectInfo(0);
 							createWordCloud(_.pluck(selectedObjects,'tags'));
-							// createInsetMap();
-							toggleTagCloud(1);
+							toggleSelectInfo(1);
 						}
 					}
 
 					else { // if selecting new object
 						if (selectedObjects.length > 0 && !(event.shiftKey)) { // if objects are already selected, and not pressing shift key
-							for (var x in selectedObjects) { //clear selected objects
+							for (var x in selectedObjects) { // clear selected objects
 								console.log("Deselect - change from "+red.getHexString().toUpperCase()+" to original "+selectedObjects[x].color);
 								selectedObjects[x].cube.material.color.setHex( selectedObjects[x].color );
 							}
-							toggleTagCloud(0);
+							removeInsetBoxes();
+							toggleSelectInfo(0);
 							selectedObjects = [];
 						}
 
@@ -340,11 +346,12 @@
 						console.log("selected object",result[0])
 						console.log("Select  -  change from "+color+" to red "+red.getHexString().toUpperCase());
 						newSelected.material.color.set( red );
-						toggleTagCloud(0);
+						toggleSelectInfo(0);
 						console.log("tags array",_.pluck(selectedObjects,'tags'));
+						console.log("cube ",result[0]);
 						createWordCloud(_.pluck(selectedObjects,'tags'));
-						// createInsetMap();
-						toggleTagCloud(1);
+						addInsetMapBox(result[0].geom);
+						toggleSelectInfo(1);
 						console.log("tag cloud height: ",document.getElementById('tag-cloud').offsetHeight);
 					}
 
@@ -379,7 +386,7 @@
 			}
 
 
-			function addBox( width, depth, height, xpos, ypos, tpos, color, tags ){
+			function addBox( width, depth, height, xpos, ypos, tpos, color, tags, geom ){
 
 				var geometry = new THREE.BoxGeometry( width,height,depth); 
 				var color = new THREE.Color( color );
@@ -389,6 +396,7 @@
 				cube.name = cube.material.color.getHex();
 				
 				var cubeObject = { tags: tags, //string
+								   geom: geom, //string
 								   color: cube.material.color.getHex(), //number
 								   cube: cube }; //object
 				objects.push(cubeObject); // list of objects
@@ -396,16 +404,36 @@
 
 			}
 
-			function removeBoxes() {
-				boxes = _.pluck(objects,'cube');
+			function addBox2( width, height, depth, xpos, tpos, ypos, color ){
 
+				var geometry = new THREE.BoxGeometry( width,height,depth); 
+				var color = new THREE.Color( color );
+				var material =  new THREE.MeshLambertMaterial( { color: color,  transparent: true, opacity: 1 } );
+				var cube = new THREE.Mesh( geometry, material );
+				cube.position.set(xpos,tpos,ypos);
+				
+				scene3.add( cube );
+
+			}
+
+			function removeBoxes() {
+				// Remove boxes from main map and clear objects lists
+				boxes = _.pluck(objects,'cube');
 				for (var i=0; i<boxes.length; i++){
 					scene.remove(boxes[i]);
 				}
-
 				objects = [];
 				selectedObjects = [];
+			}
 
+			function removeInsetBoxes() {
+				// Remove boxes from inset map by traversing children of scene
+				for(var i=0; i<scene3.children.length; i++) {
+					if(scene3.children[i] instanceof THREE.Mesh){
+						scene3.remove(scene3.children[i]);
+						i--;
+					}
+				}
 			}
 
 			function buildAxes( lengthX, lengthY, lengthZ ) {
