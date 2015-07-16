@@ -33,7 +33,7 @@ var main = {
 
 	},
 
-	search: function(keywords, param, dateRange, patternType) {
+	search: function(keywords, threshold, dateRange, patternType) {
 
 		// Clear map
 		removeBoxes();
@@ -42,16 +42,16 @@ var main = {
 		var kwColors = {};
 
 		// Format inputs for the query
-		var param = param;
-		console.log("Parameter: "+param);
+		var threshold =parseFloat(threshold);
+		console.log("Parameter: ",threshold);
 
 		var dateRange, start, end;
 		if(dateRange){
 			dateRange = dateRange.split(" - "); //dateRange[0] = st, dateRange[1] = et
 			start = moment(dateRange[0]+" 00:00", "MMM DD, YYYY HH:mm").format("[']YYYY-MM-DD HH:mm[']");
 			end = moment(dateRange[1]+" 00:00", "MMM DD, YYYY HH:mm").format("[']YYYY-MM-DD HH:mm[']");
-			console.log("Start: "+start);
-			console.log("End:   "+end);
+			console.log("Start: ",start);
+			console.log("End:   ",end);
 			// console.log("Difference: ",moment(dateRange[1], "MMM DD, YYYY").diff(moment(dateRange[0], "MMM DD, YYYY")) )
 		}
 
@@ -65,9 +65,9 @@ var main = {
 				// console.log(typeof keywords[i], keywords[i]);
 				kwColors[keywords[i]] = colors[i];
 			}
-			console.log("Keyword(s): "+keywords);
-			console.log("Keywords length "+keywords.length);
-			console.log(kwColors);
+			console.log("Keyword(s): ",keywords);
+			console.log("Keywords length ",keywords.length);
+			console.log("Keyword colors: ",kwColors);
 		}
 
 		var patternType = patternType;
@@ -90,8 +90,8 @@ var main = {
 		// if(dateRange) {
 		// 	query += " and st > "+start+" and et < "+end;
 		// }
-		// if(param) {
-		// 	query += " and param = '"+param+"'";
+		// if(threshold) {
+		// 	query += " and threshold = '"+threshold+"'";
 		// 	flag = 1;
 		// }
 		// if(keywords) {    
@@ -112,14 +112,14 @@ var main = {
 			var count = 0;
 
 			var tAxisTimeRange = moment(dateRange[1], "MMM DD, YYYY").diff(moment(dateRange[0], "MMM DD, YYYY"),'minutes');
-			console.log("t-axis time range: "+tAxisTimeRange+" minutes");
+			console.log("t-axis time range: ",tAxisTimeRange," minutes");
 
 			for (var i=0; i<result.length; i++) {
 				if (keywords.indexOf("\'"+result[i].word.toUpperCase()+"\'") > -1 && //keyword matches
 					moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY")) >= 0 && // start date matches
 					moment(dateRange[1], "MMM DD, YYYY").diff(moment(result[i].et)) >= 0 && // end date matches
 					types.indexOf(result[i].type) > -1 && // type matches
-					result[i].value >= param // value matches
+					result[i].value >= threshold // value matches
 				   ) {
 
 					count++;
@@ -127,8 +127,6 @@ var main = {
 					var dataTimeRange = moment(result[i].et).diff(moment(result[i].st),'minutes');
 					var timeFromStart = (moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY"),'minutes'));
 					var latsLons = findCoords(result[i].geom);
-					console.log("geom ",result[i].geom);
-
 
 					// Boxes for main map
 					var width = translateLonToX(latsLons.lon2) - translateLonToX(latsLons.lon1); //x-axis (red)

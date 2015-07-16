@@ -265,26 +265,26 @@
 
 				createInsetMap();
 
+				//// TIME LABELS ////
+				var startTimeLabel = document.createElement("h5");
+				startTimeLabel.setAttribute("id", "start-time-label");
+				var node = document.createTextNode("Start time: 2015-06-18 06:20:30");
+				startTimeLabel.appendChild(node);
+				document.getElementById('visualization').appendChild(startTimeLabel);
+
+				var endTimeLabel = document.createElement("h5");
+				endTimeLabel.setAttribute("id", "end-time-label");
+				var node = document.createTextNode("End time:   2015-06-19 10:54:10");
+				endTimeLabel.appendChild(node);
+				document.getElementById('visualization').appendChild(endTimeLabel);
+
+
 				window.addEventListener( 'resize', onWindowResize, false );
 				container.addEventListener( 'click', onDocumentMouseMove, false );
 
 				animate();
 
 			}
-
-
-					// // Boxes for inset map
-					// var width2 = translateLonToX2(latsLons.lon2) - translateLonToX2(latsLons.lon1);
-					// var depth2 = translateLatToY2(latsLons.lat1) - translateLatToY2(latsLons.lat2);
-					// var height2 = 10;
-
-					// var xpos2 = translateLonToX2( midpoint(latsLons.lon1, latsLons.lon2) );
-					// var ypos2 = translateLatToY2( midpoint(latsLons.lat1, latsLons.lat2) );
-					// var tpos2 = 5;
-
-					// addBox2(width2, depth2, height2, xpos2, ypos2, tpos2, "#FF0000");			
-
-
 
 			// Make objects clickable
 			function onDocumentMouseMove( event ) {
@@ -343,16 +343,14 @@
 
 						// select the new object
 						selectedObjects.push( result[0] );
-						console.log("selected object",result[0])
-						console.log("Select  -  change from "+color+" to red "+red.getHexString().toUpperCase());
+						console.log("selected object - change from "+color+" to red "+red.getHexString().toUpperCase(),result[0])
 						newSelected.material.color.set( red );
 						toggleSelectInfo(0);
 						console.log("tags array",_.pluck(selectedObjects,'tags'));
-						console.log("cube ",result[0]);
 						createWordCloud(_.pluck(selectedObjects,'tags'));
 						addInsetMapBox(result[0].geom);
 						toggleSelectInfo(1);
-						console.log("tag cloud height: ",document.getElementById('tag-cloud').offsetHeight);
+						// console.log("tag cloud height: ",document.getElementById('tag-cloud').offsetHeight);
 					}
 
 					/* Algorithm for clicking on objects:

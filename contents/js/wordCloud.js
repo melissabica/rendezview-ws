@@ -1,17 +1,23 @@
 function toggleSelectInfo(onOff) { 
-	var e = document.getElementById("tag-cloud");
+	var tagCloud = document.getElementById("tag-cloud");
 	var map = document.getElementById("inset-map");
+	var stLabel = document.getElementById("start-time-label");
+	var etLabel = document.getElementById("end-time-label");
 
 	  // 1 = turn on, 0 = turn off
 	if(onOff == 1) {
-		e.style.display = 'block';
+		tagCloud.style.display = 'block';
 		map.style.display = 'block';
+		stLabel.style.display = 'block';
+		etLabel.style.display = 'block';				
 		scene3.visible = true;
 	}
 	else {
-		e.innerHTML = "";
-		e.style.display = 'none';
+		tagCloud.innerHTML = "";
+		tagCloud.style.display = 'none';
 		map.style.display = 'none';
+		stLabel.style.display = 'none';
+		etLabel.style.display = 'none';		
 		scene3.visible = false;
 	}
 }; 

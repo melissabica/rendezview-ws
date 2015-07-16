@@ -40,7 +40,7 @@ head
 						label(for='pattern-outlier') Outlier
 
 					li
-						input.btn.btn-primary.search-btn(type='button', value='Search', onClick='main.search($("input[name=keywords]").val(), $("#value-min").text(), $("#date-range-label").text(), $("input[name=pattern]:checked", "#searchOptions").val()); console.log();')
+						input.btn.btn-primary.search-btn(type='button', value='Search', onClick='main.search($("input[name=keywords]").val(), $("#value-min").val(), $("#date-range-label").text(), $("input[name=pattern]:checked", "#searchOptions").val()); console.log();')
 
 						button.btn.btn-default.reset-btn(type='reset', value='Reset', onclick='clearDatePicker()') Clear
 						a.btn.btn-default()
