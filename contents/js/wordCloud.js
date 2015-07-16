@@ -1,20 +1,25 @@
 function toggleTagCloud(onOff) { 
 	var e = document.getElementById("tag-cloud");
+	var map = document.getElementById("inset-map");
 
 	  // 1 = turn on, 0 = turn off
 	if(onOff == 1) {
 		e.style.display = 'block';
+		map.style.display = 'block';
+		scene3.visible = true;
 	}
 	else {
 		e.innerHTML = "";
 		e.style.display = 'none';
+		map.style.display = 'none';
+		scene3.visible = false;
 	}
 }; 
 
 function createWordCloud(strArr) {
 
-	var jsonArr = [];
 	// var strArr = ["HEART:1 CALL:5", "OBEY:10 PUNISH:1 CALL:1","(HT)HOSPITALITY:1 MS:20 MANAGER:1 SONIC:1 ASSISTANT:1","UNITE:1 LONDON:1 BREAK:1 CENTRAL:1 GLAD:1 GUY:5 START:1 (HT)SUMMER:1","HEART:1 CALL:5 DELETE:4 ANXIETY:3 RACE:1 ENJOY:2"];
+	var jsonArr = [];
 	var allTags = strArr.join(" ").split(" "); //make list of individual strings for each tag/count pair
 	// console.log(allTags);
 
@@ -77,4 +82,14 @@ function createWordCloud(strArr) {
 			})
 			.text(function(d) { return d.text; });
 	}
+}
+
+function createInsetMap() {
+	console.log("create inset map");
+	var test_json3 = $.getJSON("images/us.geojson", function (data) { 
+        drawThreeGeo(scene3, data, 5000, 'plane', {
+            color: 'black'
+        })    
+    });
+    scene3.visible = true;
 }

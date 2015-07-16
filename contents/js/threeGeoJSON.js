@@ -8,9 +8,12 @@ and draws the geoJSON geometries.
 var x_values = [];
 var y_values = [];
 var z_values = [];
+var scenex;
 
-function drawThreeGeo(json, radius, shape, options) {
-    
+function drawThreeGeo(scene1, json, radius, shape, options) {
+    scenex = scene1;
+    // console.log("scene: ",scene.name);
+
     var json_geom = createGeometryArray(json); 
     //An array to hold the feature geometries.
     var convertCoordinates = getConversionFunctionName(shape); 
@@ -201,9 +204,17 @@ function convertToSphereCoords(coordinates_array, sphere_radius) {
 function convertToPlaneCoords(coordinates_array, radius) {
     var lon = coordinates_array[0];
     var lat = coordinates_array[1];
-        
-    x_values.push(2200+(lat/180) * -radius); // y-axis (blue)
-    y_values.push(5400+(lon/180) * radius);  // x-axis (red)
+
+    if(scenex.name === "mainScene") {
+        x_values.push(2200+(lat/180) * -radius); // y-axis (blue)
+        y_values.push(4700+(lon/210) * radius);  // x-axis (red)
+        // x_values.push(1000+(lat/180) * -radius); // y-axis (blue)
+        // y_values.push(2500+(lon/210) * radius);  // x-axis (red)        
+    }
+    if(scenex.name === "insetMap") {
+        z_values.push(-950+(lat/180) * radius);
+        y_values.push(2300+(lon/210) * radius);
+    }
 }
 
 function drawParticle(x, y, z, options) {
@@ -213,7 +224,7 @@ function drawParticle(x, y, z, options) {
     var particle_material = new THREE.ParticleSystemMaterial(options);
     
     var particle = new THREE.ParticleSystem(particle_geom, particle_material);
-    scene.add(particle);
+    scenex.add(particle);
     
     clearArrays();
 }
@@ -224,7 +235,8 @@ function drawLine(x_values, y_values, z_values, options) {
                 
     var line_material = new THREE.LineBasicMaterial(options);
     var line = new THREE.Line(line_geom, line_material);
-    scene.add(line);
+    scenex.add(line);
+    // console.log(scenex.name);
     
     clearArrays();
 }

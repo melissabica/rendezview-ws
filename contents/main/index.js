@@ -37,6 +37,7 @@ var main = {
 
 		// Clear map
 		removeBoxes();
+		var kwColors = {};
 
 		// Format inputs for the query
 		var param = param;
@@ -45,49 +46,59 @@ var main = {
 		var dateRange, start, end;
 		if(dateRange){
 			dateRange = dateRange.split(" - "); //dateRange[0] = st, dateRange[1] = et
-			start = moment(dateRange[0], "MMM DD, YYYY").format("[']YYYY-MM-DD[']");
-			end = moment(dateRange[1], "MMM DD, YYYY").format("[']YYYY-MM-DD[']");
+			start = moment(dateRange[0]+" 00:00", "MMM DD, YYYY HH:mm").format("[']YYYY-MM-DD HH:mm[']");
+			end = moment(dateRange[1]+" 00:00", "MMM DD, YYYY HH:mm").format("[']YYYY-MM-DD HH:mm[']");
 			console.log("Start: "+start);
 			console.log("End:   "+end);
+			// console.log("Difference: ",moment(dateRange[1], "MMM DD, YYYY").diff(moment(dateRange[0], "MMM DD, YYYY")) )
 		}
 
 		if (keywords) {
 			var keywords = keywords.split(',');
+			var colors = ['5D35C6', 'D56600', '4C7900']
+			
 			//normalize keywords to uppercase
 			for(var i=0; i<keywords.length; i++){
 				keywords[i] = "\'"+keywords[i].toUpperCase()+"\'";
 				// console.log(typeof keywords[i], keywords[i]);
+				kwColors[keywords[i]] = colors[i];
 			}
 			console.log("Keyword(s): "+keywords);
 			console.log("Keywords length "+keywords.length);
+			console.log(kwColors);
 		}
 
 		var patternType = patternType;
+		var types = [];
 		console.log("Pattern type: "+patternType);
+		if(patternType.toUpperCase() === "FLOCK")
+			types = ['HH','LL'];
+		else
+			types = ['HL','LH'];
 
-		// Form database query
-		var query = "select word, st, et, value, type, geom, tags from LOCALFORM where"
+		// // Form database query
+		// var query = "select word, st, et, value, type, geom, tags from LOCALFORM where"
 
-		if(patternType.toUpperCase() === "FLOCK") {
-			query += " type in ['HH', 'LL']";
-		}
-		else {
-			query += " type in ['HL', 'LH']";
-		}
-		if(dateRange) {
-			query += " and st > "+start+" and et < "+end;
-		}
-		if(param) {
-			query += " and param = '"+param+"'";
-			flag = 1;
-		}
-		if(keywords) {    
-			query += " and word in ["+keywords+"]";
-			flag = 1;
-		}
-		//select word, st, et, value, type, geom, tags from LOCALFORM where word IN ['OPEN','WORK'] and st > '2015-06-19' limit -1
-		query += " limit -1";
-		console.log("Query: ",query);
+		// if(patternType.toUpperCase() === "FLOCK") {
+		// 	query += " type in ['HH', 'LL']";
+		// }
+		// else {
+		// 	query += " type in ['HL', 'LH']";
+		// }
+		// if(dateRange) {
+		// 	query += " and st > "+start+" and et < "+end;
+		// }
+		// if(param) {
+		// 	query += " and param = '"+param+"'";
+		// 	flag = 1;
+		// }
+		// if(keywords) {    
+		// 	query += " and word in ["+keywords+"]";
+		// 	flag = 1;
+		// }
+		// //select word, st, et, value, type, geom, tags from LOCALFORM where word IN ['OPEN','WORK'] and st > '2015-06-19' limit -1
+		// query += " limit -1";
+		// console.log("Query: ",query);
 
 		// Get data from local json -- also CoIncident
 		$.get("main/localform.json.data", function(data) {
@@ -98,37 +109,58 @@ var main = {
 
 			var count = 0;
 
-			for (var i=0; i<result.length; i++) {
-				idx = keywords.indexOf("\'"+result[i].word.toUpperCase()+"\'");
-				if (idx > -1) {
-					count++;
-					//( width, height, depth, xpos, ypos, color, tags )
-					// addBox(Math.floor(Math.random()*101), //width
-					//     Math.floor(Math.random()*101), //height
-					//     Math.floor(Math.random()*101), //depth
-					//     Math.floor(Math.random()*1001)-500, //xpos
-					//     Math.floor(Math.random()*801)-400, //ypos
-					//     "#4B3BFF",
-					//     result[i].tags);
+			var tAxisTimeRange = moment(dateRange[1], "MMM DD, YYYY").diff(moment(dateRange[0], "MMM DD, YYYY"),'minutes');
+			console.log("t-axis time range: "+tAxisTimeRange+" minutes");
 
-					// console.log(result[i].geom);					
-					// console.log(findCoords(result[i].geom));
+			for (var i=0; i<result.length; i++) {
+				if (keywords.indexOf("\'"+result[i].word.toUpperCase()+"\'") > -1 && //keyword matches
+					moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY")) >= 0 && // start date matches
+					moment(dateRange[1], "MMM DD, YYYY").diff(moment(result[i].et)) >= 0 && // end date matches
+					types.indexOf(result[i].type) > -1 && // type matches
+					result[i].value >= param
+				   ) {
+
+					count++;
+
+					// console.log(result[i].value);
+
+					var dataTimeRange = moment(result[i].et).diff(moment(result[i].st),'minutes');
+					// console.log(result[i].st+" - "+result[i].et);
+					// console.log("Difference: ",dataTimeRange);
+
+					var timeFromStart = (moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY"),'minutes'));
+					// console.log(start +', '+ result[i].st);
+					// console.log("Time from start: ", timeFromStart);
+
+					// console.log(end + ', '+ result[i].et);
+					// var timeToEnd = ( moment(dateRange[1], "MMM DD, YYYY").diff(moment(result[i].et), 'minutes') );
+					// console.log("Time to end: ", timeToEnd);
+
+					// console.log(result[i].geom);
 					latsLons = findCoords(result[i].geom);
 					// console.log(latsLons.lat1);
 
 					var width = translateLonToX(latsLons.lon2) - translateLonToX(latsLons.lon1); //x-axis (red)
-					var height = 40; // t-axis (green)
 					var depth = translateLatToY(latsLons.lat1) - translateLatToY(latsLons.lat2); // y-axis (blue)
+					var height = (dataTimeRange / tAxisTimeRange) * 2000; // t-axis (green)
+
 					var xpos = translateLonToX( midpoint(latsLons.lon1, latsLons.lon2) ); // x-axis (red)
 					var ypos = translateLatToY( midpoint(latsLons.lat1, latsLons.lat2) ); // y-axis (blue)
+					var tpos = ((timeFromStart / tAxisTimeRange) * 2000); // t-axis (green)
 
-					addBox(width, height, depth, xpos, ypos, "#4B3BFF", result[i].tags);
+					// var newColor = ColorLuminance('5E35C6', result[i].value*100);
+					var newColor = ColorLuminance(String(kwColors[("\'"+result[i].word.toUpperCase()+"\'")]), result[i].value*100);
+					// console.log("color: ",String(kwColors[("\'"+result[i].word.toUpperCase()+"\'")]));
+
+					addBox(width, depth, height, xpos, ypos, tpos, newColor, result[i].tags);
+					// addBox( width, depth, height, xpos, ypos, mytpos, color, tags )
 					// POLYGON(( -75.556703 40.380221, -73.756444 40.380221, -73.756444 40.907506, -75.556703 40.907506, -75.556703 40.380221))
 
-					break;
+					// break;
 				}
+
 				else {
-					// console.log(keywords, result[i].word.toUpperCase());
+					// not a match
 				}
 
 			}
@@ -158,27 +190,11 @@ var main = {
 
 
 
-	},
-
-	date: function(dateRange) {
-
-		var dateRange = dateRange.split(" - "); //dateRange[0] = st, dateRange[1] = et
-		var start = moment(dateRange[0], "MMM DD, YYYY").format("YYYY-MM-DD");
-		var end = moment(dateRange[1], "MMM DD, YYYY").format("YYYY-MM-DD");
-		console.log("Start: "+start);
-		console.log("End:   "+end);
-	},
-
-	pattern: function(patternType) {
-
-		var patternType = patternType;
-		console.log("Pattern type: "+patternType);
 	}
-
 }
 
 function translateLonToX(lon) {
-	return (5400+(lon/180) * 10000);
+	return (4700+(lon/210) * 10000);
 }
 
 function translateLatToY(lat) {

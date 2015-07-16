@@ -62,6 +62,18 @@ h3{
     opacity:0.9;
 }
 
+#inset-map  {
+    border: 1px solid black;
+    position: absolute;
+    top: 157px;
+    right: 0;
+    height: 125px;
+    width: 202px;
+    display: block;
+    background-color: white;
+    opacity:0.9;
+}
+
 #tag-cloud-button  {
     position: absolute;
     bottom:5px;

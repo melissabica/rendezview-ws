@@ -9,10 +9,12 @@ head
 				form#searchOptions(autocomplete='off')
 
 					li
-						h5 Parameters
+						h5 Threshold
 
-						input(type='text', name='parameters', value='')
+						//- input(type='text', name='parameters', value='')
 						//- input#ex1(data-slider-id='ex1Slider', type='text', data-slider-min='0', data-slider-max='20', data-slider-step='1', data-slider-value='14')
+						input(type='range', min='0', max='0.3', step='0.001', value='0', data-rangeslider='')
+						output#value-min(style='color:white; font-size:12px')
 
 
 					li
@@ -32,21 +34,52 @@ head
 					li
 						h5 Pattern Type
 
-						input(type='radio', name='pattern', value='flock', checked='')
+						input#pattern-flock(type='radio', name='pattern', value='flock', checked='')
 						label(for='pattern-flock') Flock
-						input(type='radio', name='pattern', value='outlier')
+						input#pattern-outlier(type='radio', name='pattern', value='outlier')
 						label(for='pattern-outlier') Outlier
 
 					li
-						input.btn.btn-primary.search-btn(type='button', value='Search', onClick='main.search($("input[name=keywords]").val(), $("input[name=parameters]").val(), $("#date-range-label").text(), $("input[name=pattern]:checked", "#searchOptions").val()); console.log();')
-
-						//main.date($("#date-range-label").text());  main.pattern($("input[name=pattern]:checked", "#searchOptions").val());
+						input.btn.btn-primary.search-btn(type='button', value='Search', onClick='main.search($("input[name=keywords]").val(), $("#value-min").text(), $("#date-range-label").text(), $("input[name=pattern]:checked", "#searchOptions").val()); console.log();')
 
 						button.btn.btn-default.reset-btn(type='reset', value='Reset', onclick='clearDatePicker()') Clear
-		// end sidebar-wrapper
+						a.btn.btn-default()
+							span.glyphicon.glyphicon-info-sign
+
+		//- end sidebar-wrapper
+
+		script.
+			$(function() {
+
+				var $document   = $(document),
+					selector    = '[data-rangeslider]',
+					$element    = $(selector);
+				// Example functionality to demonstrate a value feedback
+				function valueOutput(element) {
+					var value = element.value,
+						output = element.parentNode.getElementsByTagName('output')[0];
+					output.innerHTML = value;
+				}
+				for (var i = $element.length - 1; i >= 0; i--) {
+					valueOutput($element[i]);
+				};
+				$document.on('input', 'input[type="range"]', function(e) {
+					valueOutput(e.target);
+				});		
+					
+				// Basic rangeslider initialization
+				$element.rangeslider({
+
+					// Deactivate the feature detection
+					polyfill: false,
+
+				});
+
+			});
 
 		script(type='text/javascript').
 			$(document).ready(function() {
+				$('input[type="range"]').rangeslider();
 				var to = new Date();
 				var from = new Date(to.getTime());
 				$('#datepicker-calendar').DatePicker({
@@ -54,7 +87,7 @@ head
 					date: [from, to],
 					calendars: 1,
 					mode: 'range',
-					current: new Date(to.getFullYear(), to.getMonth(), 1),
+					current: new Date(to.getFullYear(), to.getMonth(), -1),
 					onChange: function(dates,el) {
 						// update the range display: MMM DD, YYYY - MMM DD, YYYY
 						$('#date-range-field span').text(
@@ -69,9 +102,3 @@ head
 				$('#datepicker-calendar').DatePickerClear();
 				$("#date-range-label").html("");
 			};
-
-			//- var slider = new Slider('#ex1', {
-			//- 	formatter: function(value) {
-			//- 		return 'Current value: ' + value;
-			//- 	}
-			//- });			

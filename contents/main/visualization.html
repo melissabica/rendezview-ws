@@ -21,11 +21,11 @@
 			var leftOffset = window.innerWidth - WIDTH - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
 			// var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
 			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 + 40; //fills whole screen height beneath header
-			console.log(HEADERHEIGHT);
+			// console.log(HEADERHEIGHT);
 			var HEIGHT = window.innerHeight - HEADERHEIGHT;
 			var topOffset = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top')) + document.getElementById('upper').offsetHeight;
 			// console.log(WIDTH, HEIGHT)
-			console.log("leftOffset: "+leftOffset, " topOffset: "+topOffset);
+			// console.log("leftOffset: "+leftOffset, " topOffset: "+topOffset);
 
 			var camera2,
 				scene2,
@@ -43,19 +43,28 @@
 			var tagCloud;
 			var mouse = new THREE.Vector2(), INTERSECTED;
 				raycaster = new THREE.Raycaster();
+			var scene3,
+				camera3,
+				renderer3,
+				container3,
+				INSET_MAP_WIDTH = 202,
+				INSET_MAP_HEIGHT = 150,
+				MAP_CAM_DISTANCE = 300,
+				insetMap;
 
 			init();
 
 			function init() {
 
 				scene = new THREE.Scene();
+				scene.name = "mainScene";
 
 				// CAMERA
 				var VIEW_ANGLE = 45, ASPECT = WIDTH / HEIGHT, NEAR = 0.1, FAR = 20000;
 				camera = new THREE.PerspectiveCamera( VIEW_ANGLE, ASPECT, NEAR, FAR);
 				scene.add(camera);
-				camera.position.set(0,1500,1500);
-				camera.lookAt(scene.position);	
+				camera.position.set(0,3000,1500);
+				// camera.lookAt(scene.position);	
 
 				// RENDERER
 				if ( Detector.webgl )
@@ -72,8 +81,8 @@
 				controls.maxPolarAngle = Math.PI/2;  //don't let camera go "underground"
 				controls.userPanSpeed = 10
 
-				// Add axes
-				var axes = buildAxes( 1000 );
+				// AXES
+				var axes = buildAxes( 1800, 2000, 1000 ); //x, t, y
 				scene.add( axes );
 				// axes = new THREE.AxisHelper( 1000 );
 				// scene.add( axes );
@@ -88,20 +97,34 @@
 
 				// LIGHT
 
-				var light = new THREE.PointLight(0xaaaaaa);
-				light.position.set(100,1000,100);
-				scene.add(light);
-
-				var light2 = new THREE.AmbientLight( 0x404040 );
+				var light2 = new THREE.AmbientLight( 0x999999 );
 				scene.add( light2 );
 
-				var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
-				directionalLight.position.set( 3000, 10, 2000 );
+				var directionalLight = new THREE.DirectionalLight( 0x000000, 0.5 ); //front
+				// directionalLight.position.set( 3000, 10, 2000 );
+				directionalLight.position.set( 1, 0, 0 );
 				scene.add( directionalLight );
 
-				var directionalLight2 = new THREE.DirectionalLight( 0x404040, 0.5 );
-				directionalLight2.position.set( 3000, 10, -2000 );
+				var directionalLight2 = new THREE.DirectionalLight( 0x808080, 0.5 ); //top
+				directionalLight2.position.set( 0, 0, 1 );
 				scene.add( directionalLight2 );
+
+				var directionalLight3 = new THREE.DirectionalLight( 0xFFFFFF, 0.5 ); //right
+				directionalLight3.position.set( 0, 1, 0 );
+				scene.add( directionalLight3 );
+
+				var directionalLight4 = new THREE.DirectionalLight( 0x000000, 0.5 );
+				directionalLight4.position.set( -1, 0, 0 );
+				scene.add( directionalLight4 );
+
+				var directionalLight5 = new THREE.DirectionalLight( 0x808080, 0.5 );
+				directionalLight5.position.set( 0, 0, -1 );
+				scene.add( directionalLight5 );
+
+				var directionalLight6 = new THREE.DirectionalLight( 0xFFFFFF, 0.5 );
+				directionalLight6.position.set( 0, -1, 0 );
+				scene.add( directionalLight6 );
+
 
 				// FLOOR
 				// var floorTexture = new THREE.ImageUtils.loadTexture( 'images/map-mirror2.png' );
@@ -116,10 +139,10 @@
 
 
 	            var test_json = $.getJSON("images/us.geojson", function (data) { 
-	                drawThreeGeo(data, 10000, 'plane', {
+	                drawThreeGeo(scene, data, 10000, 'plane', {
 	                    color: 'white'
 	                })    
-	            });    
+	            });
 
 				// SKYBOX
 				// var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
@@ -154,7 +177,7 @@
 				// AXES
 				// axes2 = new THREE.AxisHelper( 100 );
 				// scene2.add( axes2 );
-				axes2 = buildAxes( 100 );
+				axes2 = buildAxes( 100, 100, 100 );
 				scene2.add( axes2 );
 
 				// AXIS LABELS
@@ -217,6 +240,39 @@
 				tagCloud.setAttribute("id", "tag-cloud");
 				document.getElementById('visualization').appendChild(tagCloud);
 
+				//// INSET MAP ////
+				insetMap = document.createElement("div");
+				insetMap.setAttribute("id", "inset-map");
+				document.getElementById('visualization').appendChild(insetMap);
+
+				// CONTAINER
+				container3 = document.getElementById('inset-map');
+
+				// RENDERER
+				renderer3 = new THREE.WebGLRenderer({ alpha: true });
+				renderer3.setSize( INSET_MAP_WIDTH, INSET_MAP_HEIGHT );
+				container3.appendChild( renderer3.domElement );
+
+				scene3 = new THREE.Scene();
+				scene3.name = "insetMap";
+
+				// CAMERA
+				camera3 = new THREE.PerspectiveCamera( 90, INSET_MAP_WIDTH / INSET_MAP_HEIGHT, 1, 2000 );
+				// camera3.up = camera.up; // important!
+				camera3.position.z = 550;
+				// camera3.lookAt(scene3);
+
+				// AXES
+				// axes3 = buildAxes( 100, 100, 100 );
+				// scene3.add( axes3 );
+
+	            // var test_json3 = $.getJSON("images/us.geojson", function (data) { 
+	            //     drawThreeGeo(scene3, data, 5000, 'plane', {
+	            //         color: 'red'
+	            //     })    
+	            // });
+				
+				createInsetMap();
 
 				window.addEventListener( 'resize', onWindowResize, false );
 				container.addEventListener( 'click', onDocumentMouseMove, false );
@@ -264,6 +320,7 @@
 							selectedObjects.splice(index,1);
 							toggleTagCloud(0);
 							createWordCloud(_.pluck(selectedObjects,'tags'));
+							// createInsetMap();
 							toggleTagCloud(1);
 						}
 					}
@@ -286,7 +343,9 @@
 						toggleTagCloud(0);
 						console.log("tags array",_.pluck(selectedObjects,'tags'));
 						createWordCloud(_.pluck(selectedObjects,'tags'));
+						// createInsetMap();
 						toggleTagCloud(1);
+						console.log("tag cloud height: ",document.getElementById('tag-cloud').offsetHeight);
 					}
 
 					/* Algorithm for clicking on objects:
@@ -320,23 +379,14 @@
 			}
 
 
-			function addBox( width, height, depth, xpos, ypos, color, tags ){
-
-				var tpos = height/2;
-				// var tpos = height/2 + Math.floor((Math.random() * 1000));
+			function addBox( width, depth, height, xpos, ypos, tpos, color, tags ){
 
 				var geometry = new THREE.BoxGeometry( width,height,depth); 
 				var color = new THREE.Color( color );
-				var material =  new THREE.MeshLambertMaterial( { color: color} );
+				var material =  new THREE.MeshLambertMaterial( { color: color,  transparent: true, opacity: 1 } );
 				var cube = new THREE.Mesh( geometry, material );
 				cube.position.set(xpos,tpos,ypos);
 				cube.name = cube.material.color.getHex();
-
-				// var outlineMaterial1 = new THREE.MeshBasicMaterial( { color: 0xFFFF00, side: THREE.BackSide } );
-				// var outlineMesh1 = new THREE.Mesh( geometry, outlineMaterial1 );
-				// outlineMesh1.position.set(xpos,tpos,ypos);
-				// outlineMesh1.scale.multiplyScalar(1.05);
-				// scene.add( outlineMesh1 );
 				
 				var cubeObject = { tags: tags, //string
 								   color: cube.material.color.getHex(), //number
@@ -358,15 +408,15 @@
 
 			}
 
-			function buildAxes( length ) {
+			function buildAxes( lengthX, lengthY, lengthZ ) {
 				var axes = new THREE.Object3D();
 
 				//vector()
-				axes.add( buildAxis( new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( length, 0, 0 ), 0xFF0000, false ) ); // +X west
+				axes.add( buildAxis( new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( lengthX, 0, 0 ), 0xFF0000, false ) ); // +X west (red)
 				// axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( -length, 0, 0 ), 0xFF0000, true) ); // -X east
-				axes.add( buildAxis( new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( 0, length, 0 ), 0x00FF00, false ) ); // +Y up
+				axes.add( buildAxis( new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( 0, lengthY, 0 ), 0x00FF00, false ) ); // +Y up (green)
 				// axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, -length, 0 ), 0x00FF00, true ) ); // -Y down
-				axes.add( buildAxis( new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( 0, 0, length ), 0x0000FF, false ) ); // +Z north
+				axes.add( buildAxis( new THREE.Vector3( 0, 1, 0 ), new THREE.Vector3( 0, 0, lengthZ ), 0x0000FF, false ) ); // +Z north (blue)
 				// axes.add( buildAxis( new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, -length ), 0x0000FF, true ) ); // -Z south
 
 				return axes;
@@ -395,6 +445,8 @@
 
 			function onWindowResize(){
 
+				console.log("called onWindowResize");
+
 				// Recompute renderer dimensions
 				WIDTH = document.getElementById('visualization').offsetWidth;
 				HEIGHT = window.innerHeight - HEADERHEIGHT;
@@ -422,6 +474,11 @@
 
 				camera2.lookAt( scene2.position );
 
+				// camera3.position.copy( camera.position );
+				// camera3.position.sub( controls.center );
+				// camera3.position.setLength( CAM_DISTANCE );
+				// camera3.lookAt( scene3.position );
+
 				render();
 			}
 
@@ -429,6 +486,8 @@
 
 				renderer.render( scene, camera );
 				renderer2.render( scene2, camera2 );
+				renderer3.render( scene3, camera3 );
+
 				// if ( timeLabel ) //billboarding: always have label face camera
 					// timeLabel.lookAt( camera.position );
 				xLabel.quaternion.copy( camera.quaternion );
