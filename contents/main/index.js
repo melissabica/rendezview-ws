@@ -38,6 +38,8 @@ var main = {
 		// Clear map
 		removeBoxes();
 		removeInsetBoxes();
+		document.getElementById("start-time").innerHTML = '';
+		document.getElementById("end-time").innerHTML = '';
 		toggleSelectInfo(0);
 		var kwColors = {};
 
@@ -48,6 +50,7 @@ var main = {
 		var dateRange, start, end;
 		if(dateRange){
 			dateRange = dateRange.split(" - "); //dateRange[0] = st, dateRange[1] = et
+			// Dates on calendar start at midnight
 			start = moment(dateRange[0]+" 00:00", "MMM DD, YYYY HH:mm").format("[']YYYY-MM-DD HH:mm[']");
 			end = moment(dateRange[1]+" 00:00", "MMM DD, YYYY HH:mm").format("[']YYYY-MM-DD HH:mm[']");
 			console.log("Start: ",start);
@@ -105,28 +108,36 @@ var main = {
 		// Get data from local json -- also CoIncident
 		$.get("main/localform.json.data", function(data) {
 
+			console.log("get local data");
+
 			var results = JSON.parse(data);
 			var result = results.result;
 			// console.log(result);
+			var startTime = result[0].st; // Start time of earliest selected box
+			var endTime = result[0].et; // End time of latest selected box
 
 			var count = 0;
 
-			var tAxisTimeRange = moment(dateRange[1], "MMM DD, YYYY").diff(moment(dateRange[0], "MMM DD, YYYY"),'minutes');
+			var tAxisTimeRange = moment(dateRange[1], "MMM DD, YYYY").diff(moment(dateRange[0], "MMM DD, YYYY"),'minutes'); // Minutes in selected date range from calendar (will always be multiple of 1440 = 24 hours)
 			console.log("t-axis time range: ",tAxisTimeRange," minutes");
 
 			for (var i=0; i<result.length; i++) {
-				if (keywords.indexOf("\'"+result[i].word.toUpperCase()+"\'") > -1 && //keyword matches
+				if (keywords.indexOf("\'"+result[i].word.toUpperCase()+"\'") > -1 && // keyword matches
 					moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY")) >= 0 && // start date matches
 					moment(dateRange[1], "MMM DD, YYYY").diff(moment(result[i].et)) >= 0 && // end date matches
 					types.indexOf(result[i].type) > -1 && // type matches
-					result[i].value >= threshold // value matches
-				   ) {
+					result[i].value >= threshold) // value matches
+				{
 
 					count++;
 
-					var dataTimeRange = moment(result[i].et).diff(moment(result[i].st),'minutes');
-					var timeFromStart = (moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY"),'minutes'));
-					var latsLons = findCoords(result[i].geom);
+					// if (moment(result[i].st).diff(startTime) >= 0){
+					// 	console.log("earlier")
+					// }
+
+					var dataTimeRange = moment(result[i].et).diff(moment(result[i].st),'minutes'); // Minutes from st to et of data
+					var timeFromStart = (moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY"),'minutes')); // Minutes from beginning of date range to data st
+					var latsLons = findCoords(result[i].geom); // Object with lats and longs of data
 
 					// Boxes for main map
 					var width = translateLonToX(latsLons.lon2) - translateLonToX(latsLons.lon1); //x-axis (red)
@@ -140,7 +151,20 @@ var main = {
 					// var newColor = ColorLuminance('5E35C6', result[i].value*100);
 					var newColor = ColorLuminance(String(kwColors[("\'"+result[i].word.toUpperCase()+"\'")]), result[i].value*100);
 
-					addBox(width, depth, height, xpos, ypos, tpos, newColor, result[i].tags, result[i].geom);
+					var boxInfo = { width: width, 
+									depth: depth, 
+									height: height, 
+									xpos: xpos, 
+									ypos: ypos, 
+									tpos: tpos, 
+									color: newColor, 
+									tags: result[i].tags, 
+									geom: result[i].geom,
+									st: result[i].st,
+									et: result[i].et };
+
+					addBox(boxInfo);
+					// console.log("result[i].st: ",result[i].st, typeof result[i].st)
 
 					// break;
 				}
@@ -196,6 +220,22 @@ function translateLonToX2(lon) {
 function translateLatToY2(lat) {
 	return (-950+(lat/180) * 5000);
 }
+////
+
+// Parse WKT string to get 4 coordinates used to calculate width/depth of boxes
+function findCoords(wktString) {
+	//Example: POLYGON(( -75.556703 40.380221, -73.756444 40.380221, -73.756444 40.907506, -75.556703 40.907506, -75.556703 40.380221))
+	newStr = wktString.split(', ');
+	for(var i=0; i<newStr.length; i++) {
+		newStr[i] = newStr[i].split(' ');
+	}
+	// console.log("new string ",newStr);
+	var latLon = {lat1: parseFloat(newStr[0][2]), 
+				  lat2: parseFloat(newStr[2][1]), 
+				  lon1: parseFloat(newStr[0][1]), 
+				  lon2: parseFloat(newStr[1][0])}
+	return (latLon);
+}
 
 function midpoint(point1, point2) {
 	return ((point1 + point2) / 2);
@@ -215,6 +255,7 @@ function addInsetMapBox(geom) {
 	addBox2(width, depth, height, xpos, ypos, tpos, "#FF0000");
 }
 
+// Multiply a hex color by a value to get a different shade
 function ColorLuminance(hex, lum) {
 
 	// validate hex string
@@ -235,18 +276,34 @@ function ColorLuminance(hex, lum) {
 	return rgb;
 }
 
-function findCoords(wktString) {
-	//"POLYGON(( -75.556703 40.380221, -73.756444 40.380221, -73.756444 40.907506, -75.556703 40.907506, -75.556703 40.380221))"
-	newStr = wktString.split(', ');
-	for(var i=0; i<newStr.length; i++) {
-		newStr[i] = newStr[i].split(' ');
+
+function updateTimeLabels(start, end, shift) {
+	var stLabel = document.getElementById("start-time");
+	if(stLabel.innerHTML != "") {
+		var currentSt = moment(stLabel.innerHTML).format("YYYY-MM-DD HH:mm:ss");
+		var newSt = moment(start).format("YYYY-MM-DD HH:mm:ss");
+
+		// update if selected box start time earlier than current start time AND shift is clicked	
+		if(moment(currentSt).diff(newSt) > 0 && shift === true) { 
+			stLabel.innerHTML = start;
+		}
 	}
-	// console.log("new string ",newStr);
-	var latLon = {lat1: parseFloat(newStr[0][2]), 
-				  lat2: parseFloat(newStr[2][1]), 
-				  lon1: parseFloat(newStr[0][1]), 
-				  lon2: parseFloat(newStr[1][0])}
-	return (latLon);
+	else
+		stLabel.innerHTML = start;	
+
+
+	var etLabel = document.getElementById("end-time");
+	if(etLabel.innerHTML != "") {
+		var currentEt = moment(etLabel.innerHTML).format("YYYY-MM-DD HH:mm:ss");
+		var newEt = moment(start).format("YYYY-MM-DD HH:mm:ss");
+
+		// update if selected box end time later than current end time AND shift is clicked	
+		if(moment(newEt).diff(currentEt) > 0 && shift === true) { 
+			etLabel.innerHTML = end;
+		}
+	}
+	else
+		etLabel.innerHTML = end;
 }
 
 main.load(); // originally in js/app.js

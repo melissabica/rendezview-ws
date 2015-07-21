@@ -86,7 +86,7 @@ h3{
     right:0;
 }
 
-#start-time-label  {
+#start-time  {
     position: absolute;
     top: 60px;
     right: 210px;
@@ -94,10 +94,26 @@ h3{
     display: none;
 }
 
-#end-time-label  {
+#end-time  {
     position: absolute;
     top: 0px;
     right: 210px;
+    color: LightGray;
+    display: none;
+}
+
+#start-time-label  {
+    position: absolute;
+    top: 60px;
+    right: 346px;
+    color: LightGray;
+    display: none;
+}
+
+#end-time-label  {
+    position: absolute;
+    top: 0px;
+    right: 346px;
     color: LightGray;
     display: none;
 }

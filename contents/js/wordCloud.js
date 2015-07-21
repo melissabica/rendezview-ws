@@ -1,23 +1,29 @@
 function toggleSelectInfo(onOff) { 
 	var tagCloud = document.getElementById("tag-cloud");
 	var map = document.getElementById("inset-map");
-	var stLabel = document.getElementById("start-time-label");
-	var etLabel = document.getElementById("end-time-label");
+	var stLabel1 = document.getElementById("start-time");
+	var etLabel1 = document.getElementById("end-time");
+	var stLabel2 = document.getElementById("start-time-label");
+	var etLabel2 = document.getElementById("end-time-label");
 
 	  // 1 = turn on, 0 = turn off
 	if(onOff == 1) {
 		tagCloud.style.display = 'block';
 		map.style.display = 'block';
-		stLabel.style.display = 'block';
-		etLabel.style.display = 'block';				
+		stLabel1.style.display = 'block';
+		etLabel1.style.display = 'block';
+		stLabel2.style.display = 'block';
+		etLabel2.style.display = 'block';
 		scene3.visible = true;
 	}
 	else {
 		tagCloud.innerHTML = "";
 		tagCloud.style.display = 'none';
 		map.style.display = 'none';
-		stLabel.style.display = 'none';
-		etLabel.style.display = 'none';		
+		stLabel1.style.display = 'none';
+		etLabel1.style.display = 'none';
+		stLabel2.style.display = 'none';
+		etLabel2.style.display = 'none';
 		scene3.visible = false;
 	}
 }; 
