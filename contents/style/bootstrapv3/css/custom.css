@@ -18,6 +18,7 @@ h3{
 
 .content{
 	background-color: #000000;
+    overflow-y: auto;
 }
 
 #visualization{
@@ -31,7 +32,7 @@ h3{
     /*background-color: rgba(0,0,0, 0.5);*/
     background-color: rgba(255,255,255, 0.9);    
     border: 1px solid black; /* or none; */
-    margin: 20px;
+    /*margin: 20px;*/
     padding: 0px;
     position: absolute;
     left: 0px;
@@ -76,19 +77,19 @@ h3{
 
 #tag-cloud-button  {
     position: absolute;
-    bottom:5px;
+    bottom: 5px;
 }
 
 
 #reset-button  {
     position: absolute;
-    bottom:5px;
+    bottom: 5px;
     right:0;
 }
 
 #start-time  {
     position: absolute;
-    top: 60px;
+    top: 125px;
     right: 210px;
     color: LightGray;
     display: none;
@@ -104,7 +105,7 @@ h3{
 
 #start-time-label  {
     position: absolute;
-    top: 60px;
+    top: 125px;
     right: 346px;
     color: LightGray;
     display: none;
@@ -170,4 +171,35 @@ h3{
 
 #ex1Slider .slider-selection {
     background: #BABABA;
+}
+
+
+#sankey {
+    width: 400px;
+    height: 256px;
+}
+
+svg path:hover {
+    fill: #848484;
+}
+
+.node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+ 
+.node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+ 
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+ 
+.link:hover {
+  stroke-opacity: .5;
 }

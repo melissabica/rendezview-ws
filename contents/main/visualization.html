@@ -3,7 +3,7 @@
 	<head>
 		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 		<style>
-		  body {margin:1000;overflow:hidden;}
+		  body {margin:1000;overflow:visible;}
 		  /*canvas {display:block;}*/
 		</style> 		
 	</head>
@@ -18,11 +18,14 @@
 			
 			// set dimensions of area for visualization
 			var WIDTH = document.getElementById('lower').offsetWidth;
+			// var WIDTH = window.innerWidth - document.getElementById('sidebar-wrapper').offsetWidth - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
 			var leftOffset = window.innerWidth - WIDTH - parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-left'));
 			// var HEADERHEIGHT = $(document.getElementById('header')).outerHeight(true)+3 //includes margins
-			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 + 40; //fills whole screen height beneath header
+			var HEADERHEIGHT = 	document.getElementById('upper').offsetHeight + 6 + 40 + 256; //fills whole screen height beneath header
 			// console.log(HEADERHEIGHT);
 			var HEIGHT = window.innerHeight - HEADERHEIGHT;
+			if(HEIGHT < 350)
+				HEIGHT = 350;
 			var topOffset = parseInt(window.getComputedStyle(document.getElementById('page-content-wrapper'), null).getPropertyValue('padding-top')) + document.getElementById('upper').offsetHeight;
 			// console.log(WIDTH, HEIGHT)
 			// console.log("leftOffset: "+leftOffset, " topOffset: "+topOffset);
@@ -125,6 +128,13 @@
 				directionalLight6.position.set( 0, -1, 0 );
 				scene.add( directionalLight6 );
 
+				// MAP
+	            var test_json = $.getJSON("images/us.geojson", function (data) { 
+	                drawThreeGeo(scene, data, 10000, 'plane', {
+	                    color: 'white'
+	                })    
+	            });
+
 
 				// FLOOR
 				// var floorTexture = new THREE.ImageUtils.loadTexture( 'images/map-mirror2.png' );
@@ -137,13 +147,6 @@
 				// floor.rotation.x = Math.PI / 2;
 				// scene.add(floor);
 
-
-	            var test_json = $.getJSON("images/us.geojson", function (data) { 
-	                drawThreeGeo(scene, data, 10000, 'plane', {
-	                    color: 'white'
-	                })    
-	            });
-
 				// SKYBOX
 				// var skyBoxGeometry = new THREE.BoxGeometry( 10000, 10000, 10000 );
 				// var skyBoxMaterial = new THREE.MeshBasicMaterial( { color: 0x0000FF, side: THREE.BackSide } );
@@ -152,6 +155,9 @@
 
 				//// INSET AXES ////
 				// CONTAINER
+				var insetAxes = document.createElement("div");
+				insetAxes.setAttribute("id","inset-axes");
+				document.getElementById("visualization").appendChild(insetAxes);
 				container2 = document.getElementById('inset-axes');
 
 				// // STATIC TIME AXIS LABEL
@@ -287,12 +293,45 @@
 				document.getElementById('visualization').appendChild(endTimeLabel2);
 
 
+				//// SANKEY DIAGRAM ////
+				// var img = new Image();
+				// img.src = 'images/checkerboard.jpg';
+				// document.getElementById('sankey').appendChild(img);
+
+				// google.setOnLoadCallback(drawSankeyChart);
+
+
+
 				window.addEventListener( 'resize', onWindowResize, false );
 				container.addEventListener( 'click', onDocumentMouseMove, false );
 
 				animate();
 
 			}
+
+			function drawSankeyChart() {
+				var data = new google.visualization.DataTable();
+				data.addColumn('string', 'From');
+				data.addColumn('string', 'To');
+				data.addColumn('number', 'Weight');
+				data.addRows([
+				  [ 'open (src)', 'day', 5 ],
+				  [ 'open (src)', 'today', 7 ],
+				  [ 'open (src)', 'work', 2 ],
+				  [ 'day', 'open (tgt)', 2 ],
+				  [ 'work', 'open (tgt)', 6 ],
+				  [ 'today', 'open (tgt)', 4 ]
+				]);
+
+				// Sets chart options.
+				var options = {
+				  width: 800,
+				};
+
+				// Instantiates and draws our chart, passing in some options.
+				var chart = new google.visualization.Sankey(document.getElementById('sankey'));
+				chart.draw(data, options);
+			}	
 
 			// Make objects clickable
 			function onDocumentMouseMove( event ) {
@@ -312,7 +351,7 @@
 					var intersect = intersects[ 0 ];
 					var newSelected = intersect.object;
 					// console.log(newSelected);
-					var result = $.grep(objects, function(e){ return e.cube === newSelected; }); //result[0] is clicked object in objects
+					var result = $.grep(objects, function(e){ return e.cube === newSelected; }); //result[0] is clicked object in objects list
 					//finds object in objects that has a value for cube matching newSelected
 					//http://stackoverflow.com/questions/7364150/find-object-by-id-in-array-of-javascript-objects
 					var originalColor = result[0].color;
@@ -321,7 +360,7 @@
 					var red = new THREE.Color( 0xFF0000 );
 
 					if (selectedObjects.indexOf(result[0]) > -1){ // if clicked object is already selected
-						console.log("Deselect - change from "+red.getHexString().toUpperCase()+" to original "+originalColor);
+						console.log("deselect - change from "+red.getHexString().toUpperCase()+" to original "+originalColor);
 						newSelected.material.color.setHex( originalColor );
 						if(selectedObjects.length == 1) { // if no other objects are selected, remove clicked object and clear side info
 							removeInsetBoxes();
@@ -349,7 +388,7 @@
 					else { // if selecting new object
 						if (selectedObjects.length > 0 && !(event.shiftKey)) { // if objects are already selected, and not pressing shift key
 							for (var x in selectedObjects) { // clear selected objects
-								console.log("Deselect - change from "+red.getHexString().toUpperCase()+" to original "+selectedObjects[x].color);
+								console.log("deselect - change from "+red.getHexString().toUpperCase()+" to original "+selectedObjects[x].color);
 								selectedObjects[x].cube.material.color.setHex( selectedObjects[x].color );
 							}
 							removeInsetBoxes();
@@ -497,14 +536,21 @@
 
 				// Recompute renderer dimensions
 				WIDTH = document.getElementById('visualization').offsetWidth;
+				// WIDTH = window.innerWidth - document.getElementById('sidebar-wrapper').offsetWidth;
 				HEIGHT = window.innerHeight - HEADERHEIGHT;
 
 				// Update camera and renderer
-				camera.aspect = WIDTH / window.innerHeight;
-				camera.updateProjectionMatrix();
-
-				renderer.setSize( WIDTH, HEIGHT);
-
+				if(HEIGHT < 350){
+					HEIGHT = 350;
+					camera.aspect = WIDTH / HEIGHT;
+					camera.updateProjectionMatrix();
+					renderer.setSize( WIDTH, HEIGHT);
+				}
+				else{
+					camera.aspect = WIDTH / HEIGHT;
+					camera.updateProjectionMatrix();
+					renderer.setSize( WIDTH, HEIGHT);
+				}
 				//https://github.com/mrdoob/three.js/issues/69
 
 			}
@@ -539,7 +585,6 @@
 			}
 
 		</script>
-
 
 	</body>
 </html>

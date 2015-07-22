@@ -72,11 +72,11 @@ function createWordCloud(strArr) {
 	  .rotate(0)
 	  .font("impact")
 	  .fontSize(function(d) { return d.size; })
-	  .on("end", draw);
+	  .on("end", drawCloud);
 
 	layout.start();
 
-	function draw(words) {
+	function drawCloud(words) {
 		d3.select("#tag-cloud").append("svg")
 			.attr("width", layout.size()[0])
 			.attr("height", layout.size()[1])
@@ -97,7 +97,6 @@ function createWordCloud(strArr) {
 }
 
 function createInsetMap() {
-	console.log("create inset map");
 	var test_json3 = $.getJSON("images/us.geojson", function (data) { 
         drawThreeGeo(scene3, data, 5000, 'plane', {
             color: 'black'
