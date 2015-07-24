@@ -106,7 +106,7 @@ var main = {
 		// console.log("Query: ",query);
 
 		// Get data from local json -- also CoIncident
-		$.get("main/localform.json.data", function(data) {
+		$.get("main/localform2.json.data", function(data) {
 
 			console.log("get local data");
 
@@ -142,14 +142,14 @@ var main = {
 					// Boxes for main map
 					var width = translateLonToX(latsLons.lon2) - translateLonToX(latsLons.lon1); //x-axis (red)
 					var depth = translateLatToY(latsLons.lat1) - translateLatToY(latsLons.lat2); // y-axis (blue)
-					var height = (dataTimeRange / tAxisTimeRange) * 2000; // t-axis (green)
+					var height = (dataTimeRange / tAxisTimeRange) * 1000; // t-axis (green)
 
 					var xpos = translateLonToX( midpoint(latsLons.lon1, latsLons.lon2) ); // x-axis (red)
 					var ypos = translateLatToY( midpoint(latsLons.lat1, latsLons.lat2) ); // y-axis (blue)
-					var tpos = ((timeFromStart / tAxisTimeRange) * 2000); // t-axis (green)
+					var tpos = ((timeFromStart / tAxisTimeRange) * 1000); // t-axis (green)
 
 					// var newColor = ColorLuminance('5E35C6', result[i].value*100);
-					var newColor = ColorLuminance(String(kwColors[("\'"+result[i].word.toUpperCase()+"\'")]), result[i].value*100);
+					var newColor = ColorLuminance(String(kwColors[("\'"+result[i].word.toUpperCase()+"\'")]), result[i].value*10000);
 
 					var boxInfo = { width: width, 
 									depth: depth, 
@@ -304,6 +304,137 @@ function updateTimeLabels(start, end, shift) {
 	}
 	else
 		etLabel.innerHTML = end;
+}
+
+
+function createSankey() {
+	var newJson = {"links":[], "nodes":[]};
+	$.get("main/coincident.json.data", function(data) {
+		var results = JSON.parse(data);
+		var result = results.result;
+		console.log("coincident: ",result[0]);
+		var length = result.length;
+
+		for(var i=0; i<length; i++) {
+			if(result[i].inword === "TODAY" || result[i].outword === "TODAY"){
+				// console.log("if true");
+
+				// add link from outword to inword to links if it does not yet exist
+				// console.log("find where:", (_.findWhere(newJson.links, { 'source': result[i].outword, 'target': result[i].inword })) );
+				var index = _.findIndex(newJson.links, { 'source': result[i].outword+" src", 'target': result[i].inword+" tgt" });
+				if(index === -1) {
+					newJson.links.push({"source": result[i].outword+" src", 
+										"target": result[i].inword+" tgt", 
+										"value": String(result[i].value)});
+					// console.log("new: ",result[i].outword, result[i].inword, result[i].value)
+				}
+				else {
+					// find link in newJson.links from outword to inword and update value
+					// console.log("update: ",result[i].outword, result[i].inword, newJson.links[index].value, result[i].value)
+					var newValue = parseFloat(newJson.links[index].value) + result[i].value;
+					newJson.links[index].value = String(newValue);
+				}
+
+				// add inword/outword to nodes if it does not yet exist
+				if(! (_.includes(_.pluck(newJson.nodes, 'name'), result[i].outword+" src")) ) {
+					newJson.nodes.push({"name": result[i].outword+" src"});
+				}
+				
+				if(! (_.includes(_.pluck(newJson.nodes, 'name'), result[i].inword+" tgt")) ) {
+					newJson.nodes.push({"name": result[i].inword+" tgt"});
+				}
+			}
+			if(i==199)
+				break;
+		}
+		console.log("newJson: ",JSON.stringify(newJson));
+	});
+
+
+	// load the data
+	d3.json("main/test.json.data", function(error, graph) {
+	 
+		var nodeMap = {};
+		graph.nodes.forEach(function(x) { nodeMap[x.name] = x; });
+		graph.links = graph.links.map(function(x) {
+		  return {
+			source: nodeMap[x.source],
+			target: nodeMap[x.target],
+			value: x.value
+		  };
+		});
+	 
+	  sankey
+		  .nodes(graph.nodes)
+		  .links(graph.links)
+		  .layout(32);
+	 
+	// add in the links
+	  var link = svg.append("g").selectAll(".link")
+		  .data(graph.links)
+		.enter().append("path")
+		  .attr("class", "link")
+		  .attr("d", path)
+		  .style("stroke-width", function(d) { return Math.max(1, d.dy); })
+		  .sort(function(a, b) { return b.dy - a.dy; })
+		  .on("click", function(d) { onLinkClick(d.source.name,d.target.name);removeBoxes();removeInsetBoxes(); });
+	 
+	// add the link titles
+	  link.append("title")
+			.text(function(d) {
+			return d.source.name + " → " + d.target.name + "\n" + format(d.value); });
+	 
+	// add in the nodes
+	  var node = svg.append("g").selectAll(".node")
+		  .data(graph.nodes)
+		.enter().append("g")
+		  .attr("class", "node")
+		  .attr("transform", function(d) { 
+			  return "translate(" + d.x + "," + d.y + ")"; })
+		.call(d3.behavior.drag()
+		  .origin(function(d) { return d; })
+		  .on("dragstart", function() { 
+			  this.parentNode.appendChild(this); })
+		  .on("drag", dragmove));
+	 
+	// add the rectangles for the nodes
+	  node.append("rect")
+		  .attr("height", function(d) { return d.dy; })
+		  .attr("width", sankey.nodeWidth())
+		  .style("fill", function(d) { 
+			  return d.color = color(d.name.replace(/ .*/, "")); })
+		  .style("stroke", function(d) { 
+			  return d3.rgb(d.color).darker(2); })
+		.append("title")
+		  .text(function(d) { 
+			  return d.name + "\n" + format(d.value); });
+	 
+	// add in the title for the nodes
+	  node.append("text")
+		  .attr("x", -6)
+		  .attr("y", function(d) { return d.dy / 2; })
+		  .attr("dy", ".35em")
+		  .attr("text-anchor", "end")
+		  .attr("transform", null)
+		  .text(function(d) { return d.name; })
+		.filter(function(d) { return d.x < width / 2; })
+		  .attr("x", 6 + sankey.nodeWidth())
+		  .attr("text-anchor", "start");
+	 
+	// the function for moving the nodes
+	  function dragmove(d) {
+		d3.select(this).attr("transform", 
+		   "translate(" + d.x + "," + (
+					d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))
+				) + ")");
+		sankey.relayout();
+		link.attr("d", path);
+	  }
+	});
+}
+
+function onLinkClick(a,b) {
+	console.log("clicked on link",a,b);
 }
 
 main.load(); // originally in js/app.js
