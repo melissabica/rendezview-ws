@@ -33,7 +33,7 @@ var main = {
 
 	},
 
-	search: function(keywords, threshold, dateRange, patternType) {
+	search: function(keywords, threshold, dateRange, patternType, database) {
 
 		// Clear map
 		removeBoxes();
@@ -105,14 +105,19 @@ var main = {
 		// query += " limit -1";
 		// console.log("Query: ",query);
 
+		if (database === "localform")
+			db = "main/localform2.json.data"
+		else if (database === "coincident")
+			db = "main/coincident.json.data"
+
 		// Get data from local json -- also CoIncident
-		$.get("main/localform2.json.data", function(data) {
+		$.get(db, function(data) {
 
 			console.log("get local data");
 
 			var results = JSON.parse(data);
 			var result = results.result;
-			// console.log(result);
+			console.log(result);
 			var startTime = result[0].st; // Start time of earliest selected box
 			var endTime = result[0].et; // End time of latest selected box
 
@@ -122,10 +127,16 @@ var main = {
 			console.log("t-axis time range: ",tAxisTimeRange," minutes");
 
 			for (var i=0; i<result.length; i++) {
-				if (keywords.indexOf("\'"+result[i].word.toUpperCase()+"\'") > -1 && // keyword matches
+				var word;
+				if(database === "localform")
+					word = result[i].word;
+				if(database === "coincident")
+					word = result[i].outword;
+
+				if (keywords.indexOf("\'"+word.toUpperCase()+"\'") > -1 && // keyword matches
 					moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY")) >= 0 && // start date matches
 					moment(dateRange[1], "MMM DD, YYYY").diff(moment(result[i].et)) >= 0 && // end date matches
-					types.indexOf(result[i].type) > -1 && // type matches
+					((types.indexOf(result[i].type) > -1) || database==="coincident") && // type matches (if localform)
 					result[i].value >= threshold) // value matches
 				{
 
@@ -149,7 +160,11 @@ var main = {
 					var tpos = ((timeFromStart / tAxisTimeRange) * 1000); // t-axis (green)
 
 					// var newColor = ColorLuminance('5E35C6', result[i].value*100);
-					var newColor = ColorLuminance(String(kwColors[("\'"+result[i].word.toUpperCase()+"\'")]), result[i].value*10000);
+					if(database === "localform")
+						mult = 10000;
+					else
+						mult = 1;
+					var newColor = ColorLuminance(String(kwColors[("\'"+word.toUpperCase()+"\'")]), result[i].value*mult);
 
 					var boxInfo = { width: width, 
 									depth: depth, 
@@ -171,6 +186,13 @@ var main = {
 
 				else {
 					// not a match
+					// console.log(keywords.indexOf("\'"+word.toUpperCase()+"\'") > -1);
+					// console.log(keywords, word);
+					// console.log(moment(result[i].st).diff(moment(dateRange[0], "MMM DD, YYYY")) >= 0); // start date matches
+					// console.log(moment(dateRange[1], "MMM DD, YYYY").diff(moment(result[i].et)) >= 0); // end date matches
+					// console.log( (types.indexOf(result[i].type) > -1) || database==="coincident" ); // type matches
+
+					// break;
 				}
 
 			}
@@ -316,15 +338,15 @@ function createSankey() {
 		var length = result.length;
 
 		for(var i=0; i<length; i++) {
-			if(result[i].inword === "TODAY" || result[i].outword === "TODAY"){
+			if(result[i].inword === "TODAY" && result[i].outword != "TODAY"){
 				// console.log("if true");
 
 				// add link from outword to inword to links if it does not yet exist
 				// console.log("find where:", (_.findWhere(newJson.links, { 'source': result[i].outword, 'target': result[i].inword })) );
-				var index = _.findIndex(newJson.links, { 'source': result[i].outword+" src", 'target': result[i].inword+" tgt" });
+				var index = _.findIndex(newJson.links, { 'source': result[i].outword, 'target': result[i].inword });
 				if(index === -1) {
-					newJson.links.push({"source": result[i].outword+" src", 
-										"target": result[i].inword+" tgt", 
+					newJson.links.push({"source": result[i].outword, 
+										"target": result[i].inword, 
 										"value": String(result[i].value)});
 					// console.log("new: ",result[i].outword, result[i].inword, result[i].value)
 				}
@@ -336,12 +358,12 @@ function createSankey() {
 				}
 
 				// add inword/outword to nodes if it does not yet exist
-				if(! (_.includes(_.pluck(newJson.nodes, 'name'), result[i].outword+" src")) ) {
-					newJson.nodes.push({"name": result[i].outword+" src"});
+				if(! (_.includes(_.pluck(newJson.nodes, 'name'), result[i].outword)) ) {
+					newJson.nodes.push({"name": result[i].outword});
 				}
 				
-				if(! (_.includes(_.pluck(newJson.nodes, 'name'), result[i].inword+" tgt")) ) {
-					newJson.nodes.push({"name": result[i].inword+" tgt"});
+				if(! (_.includes(_.pluck(newJson.nodes, 'name'), result[i].inword)) ) {
+					newJson.nodes.push({"name": result[i].inword});
 				}
 			}
 			if(i==199)
@@ -378,6 +400,7 @@ function createSankey() {
 		  .style("stroke-width", function(d) { return Math.max(1, d.dy); })
 		  .sort(function(a, b) { return b.dy - a.dy; })
 		  .on("click", function(d) { onLinkClick(d.source.name,d.target.name);removeBoxes();removeInsetBoxes(); });
+
 	 
 	// add the link titles
 	  link.append("title")
@@ -434,7 +457,10 @@ function createSankey() {
 }
 
 function onLinkClick(a,b) {
-	console.log("clicked on link",a,b);
+	word1 = a.split(' ');
+	word2 = b.split(' ');
+	console.log("clicked on link",word1[0],word2[0]);
+	main.search( word1[0], 0, $("#date-range-label").text(), $("input[name=pattern]:checked", "#searchOptions").val(), "coincident" );
 }
 
 main.load(); // originally in js/app.js
